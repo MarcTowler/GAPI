@@ -94,7 +94,7 @@ class UserModel extends Library\BaseModel
 			$stmt->execute([':username' => $username]);
 		} else {
 			//Looks like we have an ID number, lets check Twitch and Discord
-			$stmt = $this->_db->prepare("SELECT * FROM `character` c LEFT JOIN users u ON u.uid = c.cid LEFT JOIN class cl ON cl.id = c.class WHERE u.twitch_id = :id OR u.discord_id = :id");
+			$stmt = $this->_db->prepare("SELECT * FROM `character` c LEFT JOIN users u ON u.uid = c.cid WHERE u.twitch_id = :id OR u.discord_id = :id");
 			$stmt->execute([':id' => $username]);
 		}
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
