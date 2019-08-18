@@ -34,16 +34,25 @@ class UserModel extends Library\BaseModel
 		return $success;
 	}
 
+	public function getUser($id)
+	{
+		$stmt = $this->_db->prepare("SELECT * FROM users WHERE twitch_id = :id OR discord_id = :id");
+		$stmt->execute([':id' => $id]);
+
+		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+		return $this->_output;
+	}
+
 	public function registerPlayer($playerArray, $source)
 	{
 		//First lets get their user ID then insert them into the character array
-		$user = $this->getPlayer((($source == 'discord') ? $playerArray['did'] : $playerArray['tid']), true);
-
-		$stmt = $this->_db->prepare("INSERT INTO character (uid, username, level, class, cur_hp, max_hp, str, def, dex, spd, pouch) VALUES
-										(:uid, :name, 1, :class, :hp, :hp, :str, :def, :dex, :spd, 0");
+		$user = $this->getUser((($source == 'discord') ? $playerArray['discord_id'] : $playerArray['twitch_id']));
+		$stmt = $this->_db->prepare("INSERT INTO `character` (uid, username, level, class, cur_hp, max_hp, str, def, dex, spd, pouch) VALUES
+										(:uid, :name, 1, :class, :hp, :hp, :str, :def, :dex, :spd, 0)");
 		$stmt->execute([
-			':uid' => $user['uid'],
-			':name' => $playerArray['username'],
+			':uid'   => $user['uid'],
+			':name'  => $playerArray['name'],
 			':class' => $playerArray['class'],
 			':hp'    => $playerArray['hp'],
 			':str'   => $playerArray['str'],
@@ -53,7 +62,6 @@ class UserModel extends Library\BaseModel
 		]);
 
 		$success = ($this->_db->lastInsertId() > 0) ? true : false;
-
 		return $success;
 	}
 
@@ -94,7 +102,7 @@ class UserModel extends Library\BaseModel
 			$stmt->execute([':username' => $username]);
 		} else {
 			//Looks like we have an ID number, lets check Twitch and Discord
-			$stmt = $this->_db->prepare("SELECT * FROM `character` c LEFT JOIN users u ON u.uid = c.cid WHERE u.twitch_id = :id OR u.discord_id = :id");
+			$stmt = $this->_db->prepare("SELECT * FROM `character` c LEFT JOIN users u ON u.uid = c.uid WHERE u.twitch_id = :id OR u.discord_id = :id");
 			$stmt->execute([':id' => $username]);
 		}
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -127,6 +135,39 @@ class UserModel extends Library\BaseModel
 
 		$this->_output['armour'] = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
 		
+		return $this->_output;
+	}
+
+	public function updateCoin($user, $amount)
+	{
+		$stmt = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE username = :user");
+		$stmt->execute(
+			[
+				":user"   => $user,
+				":amount" => $amount
+			]
+		);
+
+		return true;
+	}
+
+	public function getCoins($user, $flag)
+	{
+		$stmt = '';
+
+		//We are looking at a username
+		if(!$flag) {
+			$stmt = $this->_db->prepare("SELECT pouch FROM `character` WHERE username = :username");
+			$stmt->execute([':username' => $user]);
+		} else {
+			//Looks like we have an ID number, lets check Twitch and Discord
+			$stmt = $this->_db->prepare("SELECT pouch FROM `character` c LEFT JOIN users u ON u.uid = c.cid WHERE u.twitch_id = :id OR u.discord_id = :id");
+			$stmt->execute([':id' => $user]);
+		}
+
+		$tmp = $stmt->fetch(\PDO::FETCH_ASSOC)['pouch'];
+		$this->_output = (is_null($tmp)) ? 0 : $tmp;
+
 		return $this->_output;
 	}
 }

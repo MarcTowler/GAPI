@@ -147,4 +147,37 @@ class User extends Library\BaseController
 
 		return (!$success) ? $this->_output->output(400, $output, false) : $this->_output->output(200, $output, false);
 	}
+
+	public function updateCoins()
+	{
+		$input = json_decode(file_get_contents('php://input'), true);
+
+		$char = $this->_db->getPlayer($input['discord_id'], true);
+
+		$output = $this->_db->updateCoin($char['username'], $input['pouch']);
+
+		return $this->_output->output(200, $output, false);
+	}
+
+	public function fightWin()
+	{
+		$input = json_decode(file_get_contents('php://input'), true);
+
+		$char = $this->_db->getPlayer($input['discord_id'], true);
+
+		//$output = $this->_db->updateCoin($char['username'], $input['pouch']);
+		//Need to update player and monster fight stats, need to update XP, coin and HP for player
+
+		return $this->_output->output(200, true, false);
+	}
+
+	public function getCoins()
+	{
+		$user = $this->_params[0];
+		$flag = (isset($this->_params[1])) ? $this->_params[1] : false;
+
+		$pouch = $this->_db->getCoins($user, $flag);
+
+		return $this->_output->output(200, $pouch, true);
+	}
 }
