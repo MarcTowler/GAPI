@@ -55,18 +55,19 @@ class BankModel extends Library\BaseModel
 
 	public function deposit($uuid, $amount)
 	{
-		$existing = $this->_link($uuid);
+		$uid      = $this->_getUID($uuid)['uid'];
+		$existing = $this->_link($uid);
 
 		if($existing == false)
 		{
 			return ['success' => false, 'reason' => "no account"];
 		} else {
-			$pouch = $this->_db->prepare("SELECT pouch FROM character WHERE uid = :uuid");
+			$pouch = $this->_db->prepare("SELECT pouch FROM `character` WHERE uid = :uuid");
 			$pouch->execute([':uuid' => $existing['uid']]);
 
 			$total = $pouch->fetch(\PDO::FETCH_ASSOC);
 
-			$total = ($total == false) ? 0 : $total['currency'];
+			$total = ($total == false) ? 0 : $total['pouch'];
 
 			if(($total - $amount) < 0)
 			{
@@ -81,7 +82,7 @@ class BankModel extends Library\BaseModel
 						]
 					);
 
-					$pouch = $this->_db->prepare("UPDATE character SET pouch = :newbal WHERE uid = :uuid");
+					$pouch = $this->_db->prepare("UPDATE `character` SET pouch = :newbal WHERE uid = :uuid");
 					$pouch->execute(
 						[
 							':uuid'   => $existing['uid'],
@@ -101,8 +102,8 @@ class BankModel extends Library\BaseModel
 
 	public function open_account($uuid)
 	{
-		$existing = $this->_link($uuid);
 		$uid      = $this->_getUID($uuid);
+		$existing = $this->_link($uid['uid']);
 
 		if($existing == false)
 		{
@@ -120,7 +121,7 @@ class BankModel extends Library\BaseModel
 
 	public function check_balance($uuid)
 	{
-		$existing = $this->_link($uuid);
+		$existing = $this->_link($this->_getUID($uuid)['uid']);
 
 		if($existing === false)
 		{
@@ -137,7 +138,7 @@ class BankModel extends Library\BaseModel
 
 	private function _link($uuid)
 	{
-		$check = $this->_db->prepare("SELECT b.uid FROM bank b INNER JOIN character c ON b.uid = c.uid WHERE c.twitch_id = :uuid OR c.discord_id = :uuid");
+		$check = $this->_db->prepare("SELECT b.uid FROM bank b INNER JOIN `character` c ON b.uid = c.cid WHERE c.uid = :uuid");
 		$check->execute([':uuid' => $uuid]);
 
 		return $check->fetch(\PDO::FETCH_ASSOC);
@@ -145,7 +146,7 @@ class BankModel extends Library\BaseModel
 
 	private function _getUID($uuid)
 	{
-		$check = $this->_db->prepare("SELECT uid FROM character WHERE twitch_id = :uuid OR discord_id = :uuid");
+		$check = $this->_db->prepare("SELECT uid FROM users WHERE twitch_id = :uuid OR discord_id = :uuid");
 		$check->execute([':uuid' => $uuid]);
 
 		return $check->fetch(\PDO::FETCH_ASSOC);
