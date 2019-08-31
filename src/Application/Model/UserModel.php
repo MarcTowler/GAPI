@@ -161,7 +161,7 @@ class UserModel extends Library\BaseModel
 			$stmt->execute([':username' => $user]);
 		} else {
 			//Looks like we have an ID number, lets check Twitch and Discord
-			$stmt = $this->_db->prepare("SELECT pouch FROM `character` c LEFT JOIN users u ON u.uid = c.cid WHERE u.twitch_id = :id OR u.discord_id = :id");
+			$stmt = $this->_db->prepare("SELECT pouch FROM `character` c LEFT JOIN users u ON u.uid = c.uid WHERE u.twitch_id = :id OR u.discord_id = :id");
 			$stmt->execute([':id' => $user]);
 		}
 
