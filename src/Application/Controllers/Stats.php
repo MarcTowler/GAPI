@@ -27,5 +27,20 @@ class Stats extends Library\BaseController
         $outcome = json_encode($this->_db->gold_stats($limit));
 
         return $this->_output->output(200, $outcome, true);
-    }
+	}
+	
+	public function pve_win()
+	{
+
+	}
+
+	public function pve_loss()
+	{
+
+	}
+
+	public function level()
+	{
+		
+	}
 }
