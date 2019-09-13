@@ -165,7 +165,8 @@ class User extends Library\BaseController
 
 		$char = $this->_db->getPlayer($input['discord_id'], true);
 
-		//$output = $this->_db->updateCoin($char['username'], $input['pouch']);
+		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch']);
+		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp']);
 		//Need to update player and monster fight stats, need to update XP, coin and HP for player
 
 		return $this->_output->output(200, true, false);

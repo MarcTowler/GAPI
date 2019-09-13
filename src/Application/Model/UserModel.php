@@ -151,6 +151,19 @@ class UserModel extends Library\BaseModel
 		return true;
 	}
 
+	public function updateXP($user, $amount)
+	{
+		$stmt = $this->_db->prepare("UPDATE `character` SET xp = xp + :amount WHERE username = :user");
+		$stmt->execute(
+			[
+				":user"   => $user,
+				":amount" => $amount
+			]
+		);
+
+		return true;
+	}
+
 	public function getCoins($user, $flag)
 	{
 		$stmt = '';
