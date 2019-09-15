@@ -27,7 +27,7 @@ class Monster extends Library\BaseController
             return $this->_output->output(401, "Authorization Failed", false);
         }*/
 
-        $mon = $this->_db->get_monster(['min' => 1, 'max' => 1]);
+        $mon = $this->_db->get_monster(['min' => 1, 'max' => 5]);
             
         return $this->_output->output(200, $mon, false);
     }
