@@ -46,7 +46,7 @@ class MonsterModel extends Library\BaseModel
             ':npc'    => $id,
             ':player' => $player
         ]);
-        
+
         return true;
     }
 }
