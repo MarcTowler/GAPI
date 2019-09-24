@@ -131,9 +131,62 @@ class User extends Library\BaseController
 			$id_flag = (isset($this->_params[1])) ? $this->_params[1] : false;
 
 			//lets check the db for the player name
-			$u = $this->_db->getPlayer($this->_params[0], $id_flag);
-			$output = $this->_db->getClass($u['class']);
-			$output = $this->_db->getGear($u['uid']);
+			$tmp                   = [];
+			$u                     = $this->_db->getPlayer($this->_params[0], $id_flag);
+			$output                = $this->_db->getClass($u['class']);
+			$output                = $this->_db->getGear($u['uid']);
+			$output['attack_msg']  = isset($output['weapon'][0]['attack_msg']) ? $output['weapon'][0]['attack_msg'] : 'used their fist to hit';
+			$output['defense_msg'] = 'taking a step back';
+
+			for($i = 0; $i < sizeof($output['armour']); $i++)
+			{
+				switch($output['armour'][$i]['fit_position'])
+				{
+					case 'head':
+						$tmp['head'] = $output['armour'][$i];
+						$output['str'] += $output['armour'][$i]['str_mod'];
+						$output['def'] += $output['armour'][$i]['def_mod'];
+						$output['spd'] += $output['armour'][$i]['spd_mod'];
+						$output['dex'] += $output['armour'][$i]['dex_mod'];
+
+						break;
+					case 'chest':
+						$tmp['chest'] = $output['armour'][$i];
+						$output['str'] += $output['armour'][$i]['str_mod'];
+						$output['def'] += $output['armour'][$i]['def_mod'];
+						$output['spd'] += $output['armour'][$i]['spd_mod'];
+						$output['dex'] += $output['armour'][$i]['dex_mod'];
+
+						break;
+					case 'arms':
+						$tmp['arms'] = $output['armour'][$i];
+						$output['defense_msg'] = $output['armour'][$i]['defense_msg'];
+						$output['str'] += $output['armour'][$i]['str_mod'];
+						$output['def'] += $output['armour'][$i]['def_mod'];
+						$output['spd'] += $output['armour'][$i]['spd_mod'];
+						$output['dex'] += $output['armour'][$i]['dex_mod'];
+
+						break;
+					case 'legs':
+						$tmp['legs'] = $output['armour'][$i];
+						$output['str'] += $output['armour'][$i]['str_mod'];
+						$output['def'] += $output['armour'][$i]['def_mod'];
+						$output['spd'] += $output['armour'][$i]['spd_mod'];
+						$output['dex'] += $output['armour'][$i]['dex_mod'];
+
+						break;
+					case 'feet':
+						$tmp['feet'] = $output['armour'][$i];
+						$output['str'] += $output['armour'][$i]['str_mod'];
+						$output['def'] += $output['armour'][$i]['def_mod'];
+						$output['spd'] += $output['armour'][$i]['spd_mod'];
+						$output['dex'] += $output['armour'][$i]['dex_mod'];
+
+						break;
+				}
+			}
+
+			$output['armour'] = $tmp;
 
 			if(is_array($output))
 			{
