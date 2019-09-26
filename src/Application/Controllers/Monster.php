@@ -26,8 +26,53 @@ class Monster extends Library\BaseController
         {
             return $this->_output->output(401, "Authorization Failed", false);
         }*/
+        $tier = $this->_params[0];
+        $min  = 0;
+        $max  = 0;
 
-        $mon = $this->_db->get_monster(['min' => 1, 'max' => 5]);
+        switch($tier)
+        {
+            case '1':
+                $min = 1;
+                $max = 5;
+
+                break;
+            case '2':
+                $min = 6;
+                $max = 10;
+
+                break;
+            case '3':
+                $min = 11;
+                $max = 30;
+
+                break;
+            case '4':
+                $min = 31;
+                $max = 50;
+
+                break;
+            case '5':
+                $min = 51;
+                $max = 70;
+
+                break;
+            case '6':
+                $min = 71;
+                $max = 90;
+
+                break;
+            case '7':
+                $min = 91;
+                $max = 100;
+
+                break;
+            default:
+                $min = 0;
+                $max = 1;
+        }
+
+        $mon = $this->_db->get_monster(['min' => $min, 'max' => $max]);
             
         return $this->_output->output(200, $mon, false);
     }
