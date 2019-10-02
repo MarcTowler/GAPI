@@ -79,11 +79,12 @@ class Monster extends Library\BaseController
 
     public function updateStats()
     {
-        if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
+        /*if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
         {
             return $this->_output->output(401, "Authorization Failed", false);
-        }
+        }*/
         
+        //0 = monster id, 1 = status either true for win or false for loss
         $this->_db->update_stats($this->_params[0], $this->_params[1]);
 
         return $this->_output->output(200, "Stats Updated", false);

@@ -7,7 +7,7 @@
  */
 
 namespace API\Library;
-
+use GuzzleHttp\Client;
 
 abstract class BaseController
 {
@@ -17,15 +17,17 @@ abstract class BaseController
 	protected $_router;
 	protected $_auth;
 	protected $_headers;
+	protected $_guzzle;
 
 	public function __construct()
 	{
-		$this->_router = new Router();
-		$this->_params = $this->_router->getAllParameters();
-		$this->_output = new Output();
-		$this->_log = new Logger();
-		$this->_auth = new Authentication();
+		$this->_router  = new Router();
+		$this->_params  = $this->_router->getAllParameters();
+		$this->_output  = new Output();
+		$this->_log     = new Logger();
+		$this->_auth    = new Authentication();
 		$this->_headers = $this->_router->getAllHeaders();
+		$this->_guzzle  = new Client();
 	}
 
 	public function __destruct()
