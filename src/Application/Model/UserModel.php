@@ -183,4 +183,12 @@ class UserModel extends Library\BaseModel
 
 		return $this->_output;
 	}
+
+	public function level($user)
+	{
+		$stmt = $this->_db->prepare("UPDATE `character` SET level = level + 1 WHERE username = :user");
+		$stmt->execute([":user" => $user]);
+
+		return true;
+	}
 }

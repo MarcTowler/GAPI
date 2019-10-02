@@ -220,7 +220,7 @@ class User extends Library\BaseController
 
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch']);
 		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp']);
-		//Need to update player and monster fight stats, need to update XP, coin and HP for player
+		//Need to update player and monster fight stats, need to update XP, coin and HP for player, also updateXP() might be needed to be a seperate private function here to check for level up
 
 		return $this->_output->output(200, true, false);
 	}
@@ -233,5 +233,347 @@ class User extends Library\BaseController
 		$pouch = $this->_db->getCoins($user, $flag);
 
 		return $this->_output->output(200, $pouch, true);
+	}
+
+	public function levelUp()
+	{
+		$uid = $this->_params[0];
+		$xp  = $this->_params[1];
+
+		$levelUp = false;
+
+		//lets get the user's current level and check against the curve
+		$player = $this->_db->getPlayer($uid, true);
+		
+		switch($player['level'])
+		{
+			case 1:
+				if(($player['xp'] + $xp) >= 101.27)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 2:
+				if(($player['xp'] + $xp) >= 210.12)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 3:
+				if(($player['xp'] + $xp) >= 334.16)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 4:
+				if(($player['xp'] + $xp) >= 480.96)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 5:
+				if(($player['xp'] + $xp) >= 658.13)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 6:
+				if(($player['xp'] + $xp) >= 873.24)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 7:
+				if(($player['xp'] + $xp) >= 1133.90)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 8:
+				if(($player['xp'] + $xp) >= 1447.68)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 9:
+				if(($player['xp'] + $xp) >= 1822.19)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 10:
+				if(($player['xp'] + $xp) >= 2265)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 11:
+				if(($player['xp'] + $xp) >= 2783.72)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 12:
+				if(($player['xp'] + $xp) >= 3385.92)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 13:
+				if(($player['xp'] + $xp) >= 4079.21)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 14:
+				if(($player['xp'] + $xp) >= 4871.16)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 15:
+				if(($player['xp'] + $xp) >= 5769.38)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 16:
+				if(($player['xp'] + $xp) >= 6781.44)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 17:
+				if(($player['xp'] + $xp) >= 7914.95)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 18:
+				if(($player['xp'] + $xp) >= 9177.48)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 19:
+				if(($player['xp'] + $xp) >= 10576.64)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 20:
+				if(($player['xp'] + $xp) >= 12120)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 21:
+				if(($player['xp'] + $xp) >= 13815.17)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 22:
+				if(($player['xp'] + $xp) >= 15669.72)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 23:
+				if(($player['xp'] + $xp) >= 17691.26)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 24:
+				if(($player['xp'] + $xp) >= 19887.36)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 25:
+				if(($player['xp'] + $xp) >= 22265.63)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 26:
+				if(($player['xp'] + $xp) >= 24833.64)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 27:
+				if(($player['xp'] + $xp) >= 27599)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 28:
+				if(($player['xp'] + $xp) >= 30569.28)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 29:
+				if(($player['xp'] + $xp) >= 33752.09)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 30:
+				if(($player['xp'] + $xp) >= 37155)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 31:
+				if(($player['xp'] + $xp) >= 40785.62)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 32:
+				if(($player['xp'] + $xp) >= 44651.52)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 33:
+				if(($player['xp'] + $xp) >= 48760.31)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 34:
+				if(($player['xp'] + $xp) >= 53119.56)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 35:
+				if(($player['xp'] + $xp) >= 57736.88)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 36:
+				if(($player['xp'] + $xp) >= 62619.84)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 37:
+				if(($player['xp'] + $xp) >= 67776.05)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 38:
+				if(($player['xp'] + $xp) >= 73213.08)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 39:
+				if(($player['xp'] + $xp) >= 78938.54)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+			case 40:
+				if(($player['xp'] + $xp) >= 84960)
+				{
+					$levelUp = true;
+					$this->_db->level($player['username']);
+				}
+
+				break;
+		}
+
+		if($levelUp == true)
+		{
+			return $this->_output->output(200, ['level up' => true, 'new level' => $player['level'] + 1]);
+		} else {
+			return $this->_output->output(202, ['level up' => false]);
+		}
 	}
 }
