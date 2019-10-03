@@ -164,6 +164,28 @@ class UserModel extends Library\BaseModel
 		return true;
 	}
 
+	public function updatePveStats($cid, $mid, $win)
+	{
+		if($win)
+		{
+			$stmt = $this->_db->prepare("INSERT INTO player_vs_monster (cid, mid, win) VALUES(:cid, :mid, 1) ON DUPLICATE KEY UPDATE win = win + 1");
+			$stmt->execute(
+				[
+					':cid' => $cid,
+					':mid' => $mid
+				]
+			);
+		} else {
+			$stmt = $this->_db->prepare("INSERT INTO player_vs_monster (cid, mid, loss) VALUES(:cid, :mid, 1) ON DUPLICATE KEY UPDATE loss = loss + 1");
+			$stmt->execute(
+				[
+					':cid' => $cid,
+					':mid' => $mid
+				]
+			);
+		}
+	}
+
 	public function getCoins($user, $flag)
 	{
 		$stmt = '';
