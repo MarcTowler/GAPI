@@ -18,9 +18,11 @@ abstract class BaseController
 	protected $_auth;
 	protected $_headers;
 	protected $_guzzle;
+	protected $_config;
 
 	public function __construct()
 	{
+		$this->_config  = new Config();
 		$this->_router  = new Router();
 		$this->_params  = $this->_router->getAllParameters();
 		$this->_output  = new Output();
