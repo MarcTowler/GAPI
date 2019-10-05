@@ -18,7 +18,7 @@ class MonsterModel extends Library\BaseModel
             $this->_output = "Level Range needs to be an array";
         }
 
-        $stmt = $this->_db->prepare("SELECT * FROM npc WHERE level >= :min AND level <= :max AND active = 1 ORDER BY RAND() LIMIT 1");
+        $stmt = $this->_db->prepare("SELECT * FROM npc WHERE type = 'Monster' AND level >= :min AND level <= :max AND active = 1 ORDER BY RAND() LIMIT 1");
         $stmt->execute(
             [
                 ':min' => $level_range['min'],
