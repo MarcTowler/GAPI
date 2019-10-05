@@ -214,15 +214,16 @@ class User extends Library\BaseController
 
 	public function fightWin()
 	{
-		$input = json_decode(file_get_contents('php://input'), true);
+		//$headers = ['token' => $this->_config->getSettings('BOT_TOKEN'), 'user' => 'api_user'];
 
+		$input = json_decode(file_get_contents('php://input'), true);
 		$char = $this->_db->getPlayer($input['discord_id'], true);
 
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch']);
 		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp']);
 		//Need to update player and monster fight stats, need to update XP, coin and HP for player, also updateXP() might be needed to be a seperate private function here to check for level up
 		$this->_db->updatePveStats($char['cid'], $input['monster'], $input['win']);
-		$this->_guzzle->get('https://gapi.itslit.uk/Monster/updateStats/' . $input['monster'] . '/' . $input['win']);
+		$this->_guzzle->get('http://gapi/Monster/updateStats/' . $input['monster'] . '/' . $input['win']);
 
 		return $this->_output->output(200, true, false);
 	}
