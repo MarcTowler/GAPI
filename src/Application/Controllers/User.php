@@ -201,6 +201,13 @@ class User extends Library\BaseController
 		return (!$success) ? $this->_output->output(400, $output, false) : $this->_output->output(200, $output, false);
 	}
 
+	public function getInventory()
+	{
+		$output = $this->_db->getUserItems($this->_params[0]);
+
+		return $this->_output->output(200, $output, false);
+	}
+
 	public function updateCoins()
 	{
 		$input = json_decode(file_get_contents('php://input'), true);

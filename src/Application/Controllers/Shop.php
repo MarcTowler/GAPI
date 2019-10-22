@@ -28,21 +28,46 @@ class Shop extends Library\BaseController
 	public function shop_info()
 	{
 		//displays stored info on the shop, lore, level restrictions, specialty etc
+		$shop_id = $this->_params[0];
+
+		$shop          = $this->_db->getShopInfo($shop_id);
+		$shop['stock'] = $this->_db->getStock($shop_id);
+
+		return $this->_output->output(200, $shop, false);
 	}
 
 	public function get_inventory()
 	{
-		//get all inventory of shop, requires shop id and user id
+		//get all inventory of shop, requires shop id (params 0) and user id (params 1) - user id is to see if they are allowed access to the shop
+		$stock = $this->_db->getStock($this->_params[0]);
+
+		return $this->_output->output(200, $stock, false);
 	}
 
 	public function buy()
 	{
 		//needs shop id, user id, item id
+		$user = $this->_params[0];
+		$shop = $this->_params[1];
+		$id   = $this->_params[2];
+
+		$output = $this->_db->buyItem($shop, $user, $id);
+		
+		return $this->_output->output(200, ["Item bought"], false);
 	}
 
 	public function sell()
 	{
 		//same as above, also needs to check if the item is equipped
+		//if equipped, provide feedback in error message
+		//floor(value of item * 0.66) << the sell to the shop value
+		$user = $this->_params[0];
+		$shop = $this->_params[1];
+		$id   = $this->_params[2];
+		
+		$output = $this->_db->sellItem($shop, $user, $id);
+
+		return $this->_output->output(200, ["Item sold"], false);
 	}
 
 	public function services()

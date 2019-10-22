@@ -13,7 +13,7 @@ class BankModel extends Library\BaseModel
 	
 	public function withdraw($uuid, $amount)
 	{
-		$existing = $this->_link($uuid);
+		$existing = $this->_link($this->_getUID($uuid)['uid']);
 
 		if($existing === false)
 		{
@@ -30,7 +30,7 @@ class BankModel extends Library\BaseModel
 			{
 				$this->_output = ['success' => false, 'reason' => "lack of funds", 'balance' => $total];
 			} else {
-				$stmt = $this->_db->prepare("UPDATE character SET pouch = pouch + :amount WHERE uid = :uuid");
+				$stmt = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE uid = :uuid");
 				$stmt->execute(
 					[
 						':uuid'   => $existing['uid'],
@@ -138,7 +138,7 @@ class BankModel extends Library\BaseModel
 
 	private function _link($uuid)
 	{
-		$check = $this->_db->prepare("SELECT b.uid FROM bank b INNER JOIN `character` c ON b.uid = c.cid WHERE c.uid = :uuid");
+		$check = $this->_db->prepare("SELECT b.uid FROM bank b INNER JOIN `character` c ON b.uid = c.uid WHERE c.uid = :uuid");
 		$check->execute([':uuid' => $uuid]);
 
 		return $check->fetch(\PDO::FETCH_ASSOC);
