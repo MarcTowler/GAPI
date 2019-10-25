@@ -164,9 +164,11 @@ class UserModel extends Library\BaseModel
 		return $this->_output;
 	}
 
-	public function updateCoin($user, $amount)
+	public function updateCoin($user, $amount, $win)
 	{
-		$stmt = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE username = :user");
+		$stmt = ($win == true) ? $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE username = :user") : 
+								 $this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE username = :user");
+
 		$stmt->execute(
 			[
 				":user"   => $user,
@@ -177,9 +179,10 @@ class UserModel extends Library\BaseModel
 		return true;
 	}
 
-	public function updateXP($user, $amount)
+	public function updateXP($user, $amount, $win)
 	{
-		$stmt = $this->_db->prepare("UPDATE `character` SET xp = xp + :amount WHERE username = :user");
+		$stmt = ($win == true) ? $this->_db->prepare("UPDATE `character` SET xp = xp + :amount WHERE username = :user") : 
+								 $this->_db->prepare("UPDATE `character` SET xp = xp - :amount WHERE username = :user");
 		$stmt->execute(
 			[
 				":user"   => $user,
@@ -201,6 +204,9 @@ class UserModel extends Library\BaseModel
 					':mid' => $mid
 				]
 			);
+
+			$stmt2 = $this->_db->prepare("INSERT INTO play_fight_stats (character_id, mon_win) VALUES(:cid, 1) ON DUPLICATE KEY UPDATE mon_win = mon_win + 1");
+			$stmt2->execute([':cid' => $cid]);
 		} else {
 			$stmt = $this->_db->prepare("INSERT INTO player_vs_monster (cid, mid, loss) VALUES(:cid, :mid, 1) ON DUPLICATE KEY UPDATE loss = loss + 1");
 			$stmt->execute(
@@ -209,7 +215,12 @@ class UserModel extends Library\BaseModel
 					':mid' => $mid
 				]
 			);
+
+			$stmt2 = $this->_db->prepare("INSERT INTO play_fight_stats (character_id, mon_lose) VALUES(:cid, 1) ON DUPLICATE KEY UPDATE mon_lose = mon_lose + 1");
+			$stmt2->execute([':cid' => $cid]);
 		}
+
+		return true;
 	}
 
 	public function getCoins($user, $flag)

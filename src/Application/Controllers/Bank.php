@@ -42,7 +42,9 @@ class Bank extends Library\BaseController
 
     public function balance()
     {
-        return $this->_output->output(200, json_encode($this->_db->check_balance($this->_params[0])), true);
+        $output = $this->_db->check_balance($this->_params[0]);
+        
+        return $this->_output->output(200, $output, false);
     }
 
     public function open()
