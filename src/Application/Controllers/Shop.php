@@ -27,6 +27,8 @@ class Shop extends Library\BaseController
 
 	public function shop_info()
 	{
+		$this->_log->set_message("Getting shop info of shop id " . $this->_params[0], "INFO");
+		
 		//displays stored info on the shop, lore, level restrictions, specialty etc
 		$shop_id = $this->_params[0];
 
@@ -38,7 +40,7 @@ class Shop extends Library\BaseController
 
 	public function get_inventory()
 	{
-		//get all inventory of shop, requires shop id (params 0) and user id (params 1) - user id is to see if they are allowed access to the shop
+		$this->_log->set_message("Getting inventory of shop id " . $this->_params[0], "INFO");
 		$stock = $this->_db->getStock($this->_params[0]);
 
 		return $this->_output->output(200, $stock, false);
@@ -46,7 +48,8 @@ class Shop extends Library\BaseController
 
 	public function buy()
 	{
-		//needs shop id, user id, item id
+		$this->_log->set_message("Item ID " . $this->_params[2] . " bought by user id " . $this->_params[0] . " from shop " . $this->_params[1], "INFO");
+		
 		$user = $this->_params[0];
 		$shop = $this->_params[1];
 		$id   = $this->_params[2];
@@ -58,6 +61,7 @@ class Shop extends Library\BaseController
 
 	public function sell()
 	{
+		$this->_log->set_message("Item ID " . $this->_params[2] . " sold by user id " . $this->_params[0] . " to shop " . $this->_params[1], "INFO");
 		//same as above, also needs to check if the item is equipped
 		//if equipped, provide feedback in error message
 		//floor(value of item * 0.66) << the sell to the shop value

@@ -22,25 +22,29 @@ class Stats extends Library\BaseController
 
     public function currency()
     {
-        $limit = $this->_params[0];
+        $outcome = $this->_db->gold_stats();
 
-        $outcome = json_encode($this->_db->gold_stats($limit));
-
-        return $this->_output->output(200, $outcome, true);
+        return $this->_output->output(200, $outcome, false);
 	}
 	
 	public function pve_win()
 	{
-
+		$outcome = $this->_db->pve_win_stats();
+		
+		return $this->_output->output(200, $outcome, false);
 	}
 
 	public function pve_loss()
 	{
-
+		$outcome = $this->_db->pve_loss_stats();
+		
+		return $this->_output->output(200, $outcome, false);
 	}
 
 	public function level()
 	{
+		$outcome = $this->_db->level_stats();
 		
+		return $this->_output->output(200, $outcome, false);
 	}
 }

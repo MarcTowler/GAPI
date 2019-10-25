@@ -239,4 +239,18 @@ class UserModel extends Library\BaseModel
 
 		return true;
 	}
+
+	public function equip($user, $id, $on)
+	{
+		$stmt = $this->_db->prepare("UPDATE item_owned SET equipped = :state WHERE oid = :user AND iid = :item");
+		$stmt->execute(
+			[
+				':state' => ($on == true) ? 1 : 0,
+				':user'  => $user,
+				':item'  => $id
+			]
+		);
+
+		return $stmt->rowCount();
+	}
 }

@@ -23,6 +23,8 @@ class User extends Library\BaseController
 
 	public function registerUser()
 	{
+		$this->_log->set_message("RegisterUser called", "INFO");
+
 		if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
 		{
 			return $this->_output->output(401, "Auhtorization failed", false);
@@ -59,6 +61,8 @@ class User extends Library\BaseController
 
 	public function registerPlayer()
 	{
+		$this->_log->set_message("registerUser called", "INFO");
+
 		if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
 		{
 			return $this->_output->output(401, "Auhtorization failed", false);
@@ -95,6 +99,8 @@ class User extends Library\BaseController
 
 	public function updatePlayer() //setter
 	{
+		$this->_log->set_message("updatePlayer called", "INFO");
+
 		if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
 		{
 			return $this->_output->output(401, "Auhtorization failed", false);
@@ -120,6 +126,8 @@ class User extends Library\BaseController
 
 	public function getPlayer() //getter
 	{
+		$this->_log->set_message("Getting player, either username or id " . $this->_params[0], "INFO");
+
 		$output = [];
 		$success = false;
 
@@ -203,6 +211,8 @@ class User extends Library\BaseController
 
 	public function getInventory()
 	{
+		$this->_log->set_message("Getting inventory of user " . $this->_params[0], "INFO");
+
 		$output = $this->_db->getUserItems($this->_params[0]);
 
 		return $this->_output->output(200, $output, false);
@@ -210,6 +220,8 @@ class User extends Library\BaseController
 
 	public function updateCoins()
 	{
+		$this->_log->set_message("updating coins for user with discord id of " . $this->_params[0], "INFO");
+
 		$input = json_decode(file_get_contents('php://input'), true);
 
 		$char = $this->_db->getPlayer($input['discord_id'], true);
@@ -221,6 +233,7 @@ class User extends Library\BaseController
 
 	public function fightWin()
 	{
+		$this->_log->set_message("fightWin called", "INFO");
 		//$headers = ['token' => $this->_config->getSettings('BOT_TOKEN'), 'user' => 'api_user'];
 
 		$input = json_decode(file_get_contents('php://input'), true);
@@ -237,6 +250,8 @@ class User extends Library\BaseController
 
 	public function getCoins()
 	{
+		$this->_log->set_message("Getting coins of user id " . $this->_params[0], "INFO");
+
 		$user = $this->_params[0];
 		$flag = (isset($this->_params[1])) ? $this->_params[1] : false;
 
@@ -247,6 +262,8 @@ class User extends Library\BaseController
 
 	public function levelUp()
 	{
+		$this->_log->set_message("checking level up of user id " . $this->_params[0], "INFO");
+
 		$uid = $this->_params[0];
 		$xp  = $this->_params[1];
 
@@ -585,5 +602,29 @@ class User extends Library\BaseController
 		} else {
 			return $this->_output->output(202, ['level up' => false]);
 		}
+	}
+
+	public function equip()
+	{
+		$this->_log->set_message("equipping gear for user id " . $this->_params[0], "INFO");
+
+		$user = $this->_params[0];
+		$iid  = $this->_params[1];
+
+		$output = $this->_db->equip($user, $iid, true);
+
+		return $this->_output->output(200, $output, false);
+	}
+
+	public function unequip()
+	{
+		$this->_log->set_message("unequipping gear for user id " . $this->_params[0], "INFO");
+
+		$user = $this->_params[0];
+		$iid  = $this->_params[1];
+
+		$output = $this->_db->equip($user, $iid, false);
+
+		return $this->_output->output(200, $output, false);
 	}
 }
