@@ -56,7 +56,7 @@ class Shop extends Library\BaseController
 
 		$output = $this->_db->buyItem($shop, $user, $id);
 		
-		return $this->_output->output(200, ["Item bought"], false);
+		return $this->_output->output(200, $output, false);
 	}
 
 	public function sell()

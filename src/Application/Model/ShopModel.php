@@ -67,7 +67,7 @@ class ShopModel extends Library\BaseModel
 				]
 			);
 
-			$stmt3 = $this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE cid = :user");
+			$stmt3 = $this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE uid = :user");
 			$stmt3->execute(
 				[
 					':user'   => $user,
@@ -75,7 +75,7 @@ class ShopModel extends Library\BaseModel
 				]
 			);
 
-			return true;
+			return $shop['price'];
 		}
 	}
 
