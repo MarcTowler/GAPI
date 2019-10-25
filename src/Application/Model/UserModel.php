@@ -48,8 +48,9 @@ class UserModel extends Library\BaseModel
 	{
 		//First lets get their user ID then insert them into the character array
 		$user = $this->getUser((($source == 'discord') ? $playerArray['discord_id'] : $playerArray['twitch_id']));
-		$stmt = $this->_db->prepare("INSERT INTO `character` (uid, username, level, class, cur_hp, max_hp, str, def, dex, spd, pouch) VALUES
-										(:uid, :name, 1, :class, :hp, :hp, :str, :def, :dex, :spd, 0)");
+		$stmt = $this->_db->prepare("INSERT INTO `character` (uid, username, level, class, cur_hp, max_hp, str, def, dex, spd, pouch, registered) VALUES
+										(:uid, :name, 1, :class, :hp, :hp, :str, :def, :dex, :spd, 0, 1) ON DUPLICATE " . 
+										"KEY UPDATE class = :class, cur_hp = :hp, max_hp = :hp, str = :str, def = :def, dex = :dex, spd = :spd, registered = 1");
 		$stmt->execute([
 			':uid'   => $user['uid'],
 			':name'  => $playerArray['name'],
@@ -106,6 +107,48 @@ class UserModel extends Library\BaseModel
 			$stmt->execute([':id' => $username]);
 		}
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+		if($this->_output == false)
+		{
+			if(!$flag)
+			{
+				$stmt2 = $this->_db->prepare("SELECT c.uid FROM users c WHERE c.name = :id");
+				$stmt2->execute([':id' => $username]);
+			} else {
+				$stmt2 = $this->_db->prepare("SELECT c.uid, c.name FROM users c WHERE c.twitch_id = :id OR c.discord_id = :id");
+				$stmt2->execute([':id' => $username]);
+			}
+			$id = $stmt2->fetch(\PDO::FETCH_ASSOC);
+
+			$insert = $this->_db->prepare("INSERT INTO `character` (uid, username, class, level, cur_hp, max_hp, str, def, dex, spd, pouch) VALUES (:id, :username, 1, 1, 0, 0, 0, 0, 0, 0, 0)");
+			if(!$flag)
+			{
+				$insert->execute(
+					[
+						':id'       => $id['uid'],
+						':username' => $username
+					]
+				);
+			} else {
+				$insert->execute(
+					[
+						':id'       => $id['uid'],
+						':username' => $id['name']
+					]
+				);
+			}
+		}
+
+		//recursive call time
+		if(!$flag) {
+			$stmt3 = $this->_db->prepare("SELECT * FROM `character` WHERE username = :username");
+			$stmt->execute([':username' => $username]);
+		} else {
+			//Looks like we have an ID number, lets check Twitch and Discord
+			$stmt3 = $this->_db->prepare("SELECT * FROM `character` c LEFT JOIN users u ON u.uid = c.uid WHERE u.twitch_id = :id OR u.discord_id = :id");
+			$stmt3->execute([':id' => $username]);
+		}
+		$this->_output = $stmt3->fetch(\PDO::FETCH_ASSOC);
 
 		return $this->_output;
 	}

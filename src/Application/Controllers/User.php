@@ -83,10 +83,10 @@ class User extends Library\BaseController
 			$tmp = $this->_db->getPlayer($data['name'], false);
 
 			//check if user exists
-			if(is_array($tmp))
+			if(is_array($tmp) && $tmp['registered'] == 1)
 			{
 				$success = false;
-				$output = "User " . $data['name'] . " already exists";
+				$output = "User " . $data['name'] . " already exists and is registered";
 			} else {
 				//bot to handle validation of data before tranmission.... Next, lets check the user doesn't exist then submit
 				$success = ($this->_db->registerPlayer($data, ($this->_headers['user'] == 'discord_bot') ? 'discord' : 'twitch') == true) ? true : false;
@@ -226,7 +226,7 @@ class User extends Library\BaseController
 
 		$char = $this->_db->getPlayer($input['discord_id'], true);
 
-		$output = $this->_db->updateCoin($char['username'], $input['pouch']);
+		$output = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
 
 		return $this->_output->output(200, $output, false);
 	}
