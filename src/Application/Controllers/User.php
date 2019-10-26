@@ -272,11 +272,11 @@ class User extends Library\BaseController
 
 		//lets get the user's current level and check against the curve
 		$player = $this->_db->getPlayer($uid, true);
-		
+
 		switch($player['level'])
 		{
 			case 1:
-				if(($player['xp'] + $xp) >= 101.27)
+				if(((int)$player['xp'] + $xp) >= 101.27)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -284,7 +284,7 @@ class User extends Library\BaseController
 
 				break;
 			case 2:
-				if(($player['xp'] + $xp) >= 210.12)
+				if(((int)$player['xp'] + $xp) >= 210.12)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -292,7 +292,7 @@ class User extends Library\BaseController
 
 				break;
 			case 3:
-				if(($player['xp'] + $xp) >= 334.16)
+				if(((int)$player['xp'] + $xp) >= 334.16)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -300,7 +300,7 @@ class User extends Library\BaseController
 
 				break;
 			case 4:
-				if(($player['xp'] + $xp) >= 480.96)
+				if(((int)$player['xp'] + $xp) >= 480.96)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -308,7 +308,7 @@ class User extends Library\BaseController
 
 				break;
 			case 5:
-				if(($player['xp'] + $xp) >= 658.13)
+				if(((int)$player['xp'] + $xp) >= 658.13)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -316,7 +316,7 @@ class User extends Library\BaseController
 
 				break;
 			case 6:
-				if(($player['xp'] + $xp) >= 873.24)
+				if(((int)$player['xp'] + $xp) >= 873.24)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -324,7 +324,7 @@ class User extends Library\BaseController
 
 				break;
 			case 7:
-				if(($player['xp'] + $xp) >= 1133.90)
+				if(((int)$player['xp'] + $xp) >= 1133.90)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -332,7 +332,7 @@ class User extends Library\BaseController
 
 				break;
 			case 8:
-				if(($player['xp'] + $xp) >= 1447.68)
+				if(((int)$player['xp'] + $xp) >= 1447.68)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -340,7 +340,7 @@ class User extends Library\BaseController
 
 				break;
 			case 9:
-				if(($player['xp'] + $xp) >= 1822.19)
+				if(((int)$player['xp'] + $xp) >= 1822.19)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -348,7 +348,7 @@ class User extends Library\BaseController
 
 				break;
 			case 10:
-				if(($player['xp'] + $xp) >= 2265)
+				if(((int)$player['xp'] + $xp) >= 2265)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -356,7 +356,7 @@ class User extends Library\BaseController
 
 				break;
 			case 11:
-				if(($player['xp'] + $xp) >= 2783.72)
+				if(((int)$player['xp'] + $xp) >= 2783.72)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -364,7 +364,7 @@ class User extends Library\BaseController
 
 				break;
 			case 12:
-				if(($player['xp'] + $xp) >= 3385.92)
+				if(((int)$player['xp'] + $xp) >= 3385.92)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -372,7 +372,7 @@ class User extends Library\BaseController
 
 				break;
 			case 13:
-				if(($player['xp'] + $xp) >= 4079.21)
+				if(((int)$player['xp'] + $xp) >= 4079.21)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -380,7 +380,7 @@ class User extends Library\BaseController
 
 				break;
 			case 14:
-				if(($player['xp'] + $xp) >= 4871.16)
+				if(((int)$player['xp'] + $xp) >= 4871.16)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -388,7 +388,7 @@ class User extends Library\BaseController
 
 				break;
 			case 15:
-				if(($player['xp'] + $xp) >= 5769.38)
+				if(((int)$player['xp'] + $xp) >= 5769.38)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -396,7 +396,7 @@ class User extends Library\BaseController
 
 				break;
 			case 16:
-				if(($player['xp'] + $xp) >= 6781.44)
+				if(((int)$player['xp'] + $xp) >= 6781.44)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -404,7 +404,7 @@ class User extends Library\BaseController
 
 				break;
 			case 17:
-				if(($player['xp'] + $xp) >= 7914.95)
+				if(((int)$player['xp'] + $xp) >= 7914.95)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -412,7 +412,7 @@ class User extends Library\BaseController
 
 				break;
 			case 18:
-				if(($player['xp'] + $xp) >= 9177.48)
+				if(((int)$player['xp'] + $xp) >= 9177.48)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -420,7 +420,7 @@ class User extends Library\BaseController
 
 				break;
 			case 19:
-				if(($player['xp'] + $xp) >= 10576.64)
+				if(((int)$player['xp'] + $xp) >= 10576.64)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -428,7 +428,7 @@ class User extends Library\BaseController
 
 				break;
 			case 20:
-				if(($player['xp'] + $xp) >= 12120)
+				if(((int)$player['xp'] + $xp) >= 12120)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -436,7 +436,7 @@ class User extends Library\BaseController
 
 				break;
 			case 21:
-				if(($player['xp'] + $xp) >= 13815.17)
+				if(((int)$player['xp'] + $xp) >= 13815.17)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -444,7 +444,7 @@ class User extends Library\BaseController
 
 				break;
 			case 22:
-				if(($player['xp'] + $xp) >= 15669.72)
+				if(((int)$player['xp'] + $xp) >= 15669.72)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -452,7 +452,7 @@ class User extends Library\BaseController
 
 				break;
 			case 23:
-				if(($player['xp'] + $xp) >= 17691.26)
+				if(((int)$player['xp'] + $xp) >= 17691.26)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -460,7 +460,7 @@ class User extends Library\BaseController
 
 				break;
 			case 24:
-				if(($player['xp'] + $xp) >= 19887.36)
+				if(((int)$player['xp'] + $xp) >= 19887.36)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -468,7 +468,7 @@ class User extends Library\BaseController
 
 				break;
 			case 25:
-				if(($player['xp'] + $xp) >= 22265.63)
+				if(((int)$player['xp'] + $xp) >= 22265.63)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -476,7 +476,7 @@ class User extends Library\BaseController
 
 				break;
 			case 26:
-				if(($player['xp'] + $xp) >= 24833.64)
+				if(((int)$player['xp'] + $xp) >= 24833.64)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -484,7 +484,7 @@ class User extends Library\BaseController
 
 				break;
 			case 27:
-				if(($player['xp'] + $xp) >= 27599)
+				if(((int)$player['xp'] + $xp) >= 27599)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -492,7 +492,7 @@ class User extends Library\BaseController
 
 				break;
 			case 28:
-				if(($player['xp'] + $xp) >= 30569.28)
+				if(((int)$player['xp'] + $xp) >= 30569.28)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -500,7 +500,7 @@ class User extends Library\BaseController
 
 				break;
 			case 29:
-				if(($player['xp'] + $xp) >= 33752.09)
+				if(((int)$player['xp'] + $xp) >= 33752.09)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -508,7 +508,7 @@ class User extends Library\BaseController
 
 				break;
 			case 30:
-				if(($player['xp'] + $xp) >= 37155)
+				if(((int)$player['xp'] + $xp) >= 37155)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -516,7 +516,7 @@ class User extends Library\BaseController
 
 				break;
 			case 31:
-				if(($player['xp'] + $xp) >= 40785.62)
+				if(((int)$player['xp'] + $xp) >= 40785.62)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -524,7 +524,7 @@ class User extends Library\BaseController
 
 				break;
 			case 32:
-				if(($player['xp'] + $xp) >= 44651.52)
+				if(((int)$player['xp'] + $xp) >= 44651.52)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -532,7 +532,7 @@ class User extends Library\BaseController
 
 				break;
 			case 33:
-				if(($player['xp'] + $xp) >= 48760.31)
+				if(((int)$player['xp'] + $xp) >= 48760.31)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -540,7 +540,7 @@ class User extends Library\BaseController
 
 				break;
 			case 34:
-				if(($player['xp'] + $xp) >= 53119.56)
+				if(((int)$player['xp'] + $xp) >= 53119.56)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -548,7 +548,7 @@ class User extends Library\BaseController
 
 				break;
 			case 35:
-				if(($player['xp'] + $xp) >= 57736.88)
+				if(((int)$player['xp'] + $xp) >= 57736.88)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -556,7 +556,7 @@ class User extends Library\BaseController
 
 				break;
 			case 36:
-				if(($player['xp'] + $xp) >= 62619.84)
+				if(((int)$player['xp'] + $xp) >= 62619.84)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -564,7 +564,7 @@ class User extends Library\BaseController
 
 				break;
 			case 37:
-				if(($player['xp'] + $xp) >= 67776.05)
+				if(((int)$player['xp'] + $xp) >= 67776.05)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -572,7 +572,7 @@ class User extends Library\BaseController
 
 				break;
 			case 38:
-				if(($player['xp'] + $xp) >= 73213.08)
+				if(((int)$player['xp'] + $xp) >= 73213.08)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -580,7 +580,7 @@ class User extends Library\BaseController
 
 				break;
 			case 39:
-				if(($player['xp'] + $xp) >= 78938.54)
+				if(((int)$player['xp'] + $xp) >= 78938.54)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
@@ -588,7 +588,7 @@ class User extends Library\BaseController
 
 				break;
 			case 40:
-				if(($player['xp'] + $xp) >= 84960)
+				if(((int)$player['xp'] + $xp) >= 84960)
 				{
 					$levelUp = true;
 					$this->_db->level($player['username']);
