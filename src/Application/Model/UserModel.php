@@ -209,6 +209,16 @@ class UserModel extends Library\BaseModel
 
 	public function updateCoin($user, $amount, $win)
 	{
+		if(!$win)
+		{
+			$current = $this->getCoins($user, true);
+
+			if($current['pouch'] <= $amount)
+			{
+				$amount = $current['pouch'];
+			}
+		}
+
 		$stmt = ($win == true) ? $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE username = :user") : 
 								 $this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE username = :user");
 
