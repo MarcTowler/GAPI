@@ -233,12 +233,12 @@ class User extends Library\BaseController
 
 	public function fightWin()
 	{
-		$this->_log->set_message("fightWin called", "INFO");
 		//$headers = ['token' => $this->_config->getSettings('BOT_TOKEN'), 'user' => 'api_user'];
 
 		$input = json_decode(file_get_contents('php://input'), true);
 		$char = $this->_db->getPlayer($input['discord_id'], true);
 
+		$this->_log->set_message("fightWin called for user id" . $input['discord_id'] . " and they " . $input['win'] . " for " . $input['pouch'], "INFO");
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
 		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp'], $input['win']);
 

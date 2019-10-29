@@ -24,7 +24,7 @@ class ShopModel extends Library\BaseModel
 
 	public function getShopInfo($id)
 	{
-		$stmt = $this->_db->prepare("SELECT n.name as shopkeep, s.name, s.balance, n.lore, n.image FROM shop as s LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :id");
+		$stmt = $this->_db->prepare("SELECT s.sid, n.name as shopkeep, s.name, s.balance, n.lore, n.image FROM shop as s LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :id");
 		$stmt->execute([':id' => $id]);
 
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
