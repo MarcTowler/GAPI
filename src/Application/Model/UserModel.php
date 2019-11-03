@@ -109,7 +109,7 @@ class UserModel extends Library\BaseModel
 		}
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-		if($this->_output == false)
+		/*if($this->_output == false)
 		{
 			if(!$flag)
 			{
@@ -150,7 +150,7 @@ class UserModel extends Library\BaseModel
 			$stmt3->execute([':id' => $username]);
 		}
 		$this->_output = $stmt3->fetch(\PDO::FETCH_ASSOC);
-
+*/
 		return $this->_output;
 	}
 
@@ -187,14 +187,14 @@ class UserModel extends Library\BaseModel
 		$stmt = $this->_db->prepare("SELECT i.id, i.name, i.price, i.level_req, w.str_mod, w.def_mod, w.dex_mod, w.spd_mod, w.attack_msg, o.equipped 
 			FROM `character` as c LEFT JOIN item_owned as o ON c.uid = o.oid LEFT JOIN items 
 			as i ON o.iid = i.id LEFT JOIN weapons as w on w.iid = i.id 
-			WHERE username = :uname AND i.type = 'Weapon'");
+			WHERE username = :uname AND i.type = 'Weapon' ORDER BY o.equipped DESC");
 		$stmt->execute([':uname' => $name]);
 
 		$this->_output['weapons'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
 		$stmt2 = $this->_db->prepare("SELECT i.id, i.name, i.material, i.price, a.str_mod, a.def_mod, a.dex_mod, a.spd_mod, a.fit_position, a.defense_msg,
 		i.level_req, o.equipped FROM `character` as c LEFT JOIN item_owned as o ON c.uid = o.oid LEFT JOIN items 
-		as i ON o.iid = i.id LEFT JOIN armour as a ON i.id = a.iid WHERE username = :uname AND i.type = 'Armour'");
+		as i ON o.iid = i.id LEFT JOIN armour as a ON i.id = a.iid WHERE username = :uname AND i.type = 'Armour' ORDER BY a.fit_position, o.equipped DESC");
 		$stmt2->execute([':uname' => $name]);
 
 		$this->_output['armour'] = $stmt2->fetchAll(\PDO::FETCH_ASSOC);

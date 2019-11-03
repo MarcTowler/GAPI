@@ -14,7 +14,7 @@ class ShopModel extends Library\BaseModel
 	public function getStock($id)
 	{
 		$stmt = $this->_db->prepare("SELECT i.id, i.name, i.type, i.description, i.level_req, i.modifier, si.qty, i.price FROM shop " . 
-									"as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :id");
+									"as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :id AND si.ranged = 1");
 		$stmt->execute([':id' => $id]);
 
 		$this->_output = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -92,7 +92,7 @@ class ShopModel extends Library\BaseModel
 		);
 
 		$shop = $stmt->fetch(\PDO::FETCH_ASSOC);
-		
+
 		if($shop['balance'] < $shop['price'])
 		{
 			return false;
@@ -105,6 +105,7 @@ class ShopModel extends Library\BaseModel
 					':price' => (int)floor($shop['price'] * 0.66)
 				]
 			);
+
 
 			$stmt2 = $this->_db->prepare("DELETE FROM item_owned WHERE iid = :id AND oid = :user AND equipped = 0 LIMIT 1");
 			$stmt2->execute(
