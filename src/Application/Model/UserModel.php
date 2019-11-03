@@ -66,9 +66,9 @@ class UserModel extends Library\BaseModel
 		return $success;
 	}
 
-	public function updatePlayer(array $playerArray, $user)
+	public function updatePlayer(array $playerArray, $cid)
 	{
-		$sql = "UPDATE character SET ";
+		$sql = "UPDATE `character` SET ";
 		$exec = [];
 		$counter = 0;
 
@@ -80,15 +80,16 @@ class UserModel extends Library\BaseModel
 				$sql .= "$key=$val";
 			} else {
 				$sql .= ", $key=$val";
+				$counter++;
 			}
 
 		}
 
 		$sql = rtrim($sql, ',');
-		$sql .= " WHERE username = :name";
+		$sql .= " WHERE cid = :name";
 
 		$stmt = $this->_db->prepare($sql);
-		$stmt->execute([":name" => $user]);
+		$stmt->execute([":name" => $cid]);
 
 		return true;
 	}
@@ -209,18 +210,8 @@ class UserModel extends Library\BaseModel
 
 	public function updateCoin($user, $amount, $win)
 	{
-		if(!$win)
-		{
-			$current = $this->getCoins($user, true);
-
-			if($current['pouch'] <= $amount)
-			{
-				$amount = $current['pouch'];
-			}
-		}
-
 		$stmt = ($win == true) ? $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE username = :user") : 
-								 $this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE username = :user");
+								$this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE username = :user");
 
 		$stmt->execute(
 			[
@@ -296,9 +287,35 @@ class UserModel extends Library\BaseModel
 		return $this->_output;
 	}
 
-	public function level($user)
+	public function level($user, $stat)
 	{
-		$stmt = $this->_db->prepare("UPDATE `character` SET level = level + 1 WHERE username = :user");
+		$string = 'UPDATE `character` SET level = level + 1, ';
+
+		switch($stat)
+		{
+			case 1:
+				$string = $string . "cur_hp = cur_hp + 1, max_hp = max_hp + 1";
+
+				break;
+			case 2:
+				$string = $string . "str = str + 1";
+
+				break;
+			case 3:
+				$string = $string . "def = def + 1";
+
+				break;
+			case 4:
+				$string = $string . "dex = dex + 1";
+
+				break;
+			case 5:
+				$string = $string . "spd = spd + 1";
+
+				break;
+		}
+
+		$stmt = $this->_db->prepare($string . " WHERE username = :user");
 		$stmt->execute([":user" => $user]);
 
 		return true;
