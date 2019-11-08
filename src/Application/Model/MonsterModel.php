@@ -31,6 +31,16 @@ class MonsterModel extends Library\BaseModel
         return $this->_output;
     }
 
+    public function getSpecificMonster($id)
+    {
+        $stmt = $this->_db->prepare("SELECT n.name, n.hp, n.str, n.def, n.dex, n.spd, n.level, n.lore, s.loss FROM `npc` n INNER JOIN npc_fight_stats s ON n.nid = s.npc_id WHERE n.name = :id");
+        $stmt->execute([':id' => $id]);
+
+        $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $this->_output;
+    }
+
     public function update_stats($id, $outcome)
     {
         $stmt = ($outcome == false) ? 

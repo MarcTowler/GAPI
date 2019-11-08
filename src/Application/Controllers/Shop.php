@@ -23,6 +23,11 @@ class Shop extends Library\BaseController
 	public function list_shops()
 	{
 		//list all shops that are "open"
+		$this->_log->set_message("Listing all open shops", "INFO");
+
+		$output = $this->_db->getOpenShops();
+
+		return $this->_output->output(200, $output, false);
 	}
 
 	public function shop_info()

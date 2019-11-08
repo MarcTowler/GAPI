@@ -126,4 +126,14 @@ class ShopModel extends Library\BaseModel
 			return true;
 		}
 	}
+
+	public function getOpenShops()
+	{
+		$stmt = $this->_db->prepare("SELECT s.sid, n.name as npc_name, s.name as shop_name, s.min_level, s.balance FROM shop s INNER JOIN npc n ON s.nid = n.nid WHERE s.open = 1 ORDER BY s.sid ASC");
+		$stmt->execute();
+
+		$output = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+		return $output;
+	}
 }
