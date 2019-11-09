@@ -148,7 +148,7 @@ class User extends Library\BaseController
 
 			for($i = 0; $i < sizeof($output['armour']); $i++)
 			{
-				switch($output['armour'][$i]['fit_position'])
+				switch(strtolower($output['armour'][$i]['fit_position']))
 				{
 					case 'head':
 						$tmp['head'] = $output['armour'][$i];
