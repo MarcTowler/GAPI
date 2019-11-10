@@ -14,10 +14,25 @@ class ShopModel extends Library\BaseModel
 	public function getStock($id)
 	{
 		$stmt = $this->_db->prepare("SELECT i.id, i.name, i.type, i.description, i.level_req, i.modifier, si.qty, i.price FROM shop " . 
-									"as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :id AND si.ranged = 1");
+									"as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc " . 
+									"as n ON n.nid = s.nid WHERE s.sid = :id AND si.ranged = 1 AND i.type != 'Weapon' AND i.type !='Armour'");
 		$stmt->execute([':id' => $id]);
 
-		$this->_output = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+		$this->_output['items'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+		$stmt2 = $this->_db->prepare("SELECT i.id, i.name, i.price, i.description, i.level_req, si.qty, w.str_mod, w.def_mod, w.dex_mod, w.spd_mod " . 
+									 "FROM shop as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc as n ON " . 
+									 "n.nid = s.nid LEFT JOIN weapons as w on w.iid = i.id WHERE s.sid = :id AND si.ranged = 1 AND i.type = 'Weapon'");
+		$stmt2->execute([':id' => $id]);
+
+		$this->_output['weapons'] = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
+
+		$stmt3 = $this->_db->prepare("SELECT i.id, i.name, i.price, i.description, i.level_req, si.qty, a.str_mod, a.def_mod, a.dex_mod, a.spd_mod " . 
+									 "FROM shop as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id LEFT JOIN npc as n ON " . 
+									 "n.nid = s.nid LEFT JOIN armour as a on a.iid = i.id WHERE s.sid = :id AND si.ranged = 1 AND i.type = 'Armour'");
+		$stmt3->execute([':id' => $id]);
+
+		$this->_output['armour'] = $stmt3->fetchAll(\PDO::FETCH_ASSOC);
 
 		return $this->_output;
 	}
