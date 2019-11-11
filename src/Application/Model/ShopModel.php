@@ -65,6 +65,15 @@ class ShopModel extends Library\BaseModel
 		{
 			return false;
 		} else {
+			$user = $this->_db->prepare("SELECT pouch FROM `character` WHERE uid = :id");
+			$user->execute([':id' => $user]);
+			$tmp = $user->fetch(\PDO::FETCH_ASSOC);
+
+			if($shop['price'] > $tmp['pouch'])
+			{
+				return false;
+			}
+			
 			$stmt = $this->_db->prepare("UPDATE shop_items si INNER JOIN shop s ON (s.sid = si.sid) SET si.qty = si.qty - 1, s.balance = s.balance + :price WHERE s.sid = :shop AND si.iid = :id");
 			$stmt->execute(
 				[
@@ -130,7 +139,7 @@ class ShopModel extends Library\BaseModel
 				]
 			);
 
-			$stmt3 = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE cid = :user");
+			$stmt3 = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE uid = :user");
 			$stmt3->execute(
 				[
 					':user'   => $user,
