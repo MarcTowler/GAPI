@@ -226,7 +226,10 @@ class User extends Library\BaseController
 
 		$char = $this->_db->getPlayer($input['discord_id'], true);
 
-		$input['pouch'] = ($char['pouch'] < $input['pouch']) ? $char['pouch'] : $input['pouch'];
+		if(!$input['win'])
+		{
+			$input['pouch'] = ($char['pouch'] < $input['pouch']) ? $char['pouch'] : $input['pouch'];
+		}
 
 		$output = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
 
