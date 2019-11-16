@@ -252,6 +252,9 @@ class User extends Library\BaseController
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
 		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp'], $input['win']);
 
+		//update HP
+		$this->_db->updatePlayer(['cur_hp' => $input['newHP']], $char['cid']);
+
 		//Need to update player and monster fight stats, need to update XP, coin and HP for player, also updateXP() might be needed to be a seperate private function here to check for level up
 		$this->_db->updatePveStats($char['cid'], $input['monster'], $input['win']);
 		$this->_guzzle->get('https://gapi.itslit.uk/Monster/updateStats/' . $input['monster'] . '/' . $input['win']);
