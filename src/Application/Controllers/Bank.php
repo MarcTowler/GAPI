@@ -42,6 +42,8 @@ class Bank extends Library\BaseController
 
     public function balance()
     {
+        $this->_log->set_message("checking bank balance for user with discord id of " . $this->_params[0], "INFO");
+
         $output = $this->_db->check_balance($this->_params[0]);
         
         return $this->_output->output(200, $output, false);

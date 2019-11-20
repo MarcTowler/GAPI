@@ -171,7 +171,7 @@ class UserModel extends Library\BaseModel
 		$stmt->execute([':id' => $id]);
 
 		$this->_output['weapons'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
+		
 		$stmt2 = $this->_db->prepare("SELECT i.name, i.material, i.price, a.str_mod, a.def_mod, a.dex_mod, a.spd_mod, a.fit_position, a.defense_msg,
 		i.level_req FROM `character` as c LEFT JOIN item_owned as o ON c.uid = o.oid LEFT JOIN items 
 		as i ON o.iid = i.id LEFT JOIN armour as a ON i.id = a.iid WHERE uid = :id AND o.equipped = 1 AND i.type = 'Armour'");

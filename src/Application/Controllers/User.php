@@ -145,10 +145,15 @@ class User extends Library\BaseController
 			$output                = $this->_db->getGear($u['uid']);
 			$output['attack_msg']  = isset($output['weapon'][0]['attack_msg']) ? $output['weapon'][0]['attack_msg'] : 'used their fist to hit';
 			$output['defense_msg'] = 'taking a step back';
-			$output['mod_str'] = $output['str'];
-			$output['mod_def'] = $output['def'];
-			$output['mod_dex'] = $output['dex'];
-			$output['mod_spd'] = $output['spd'];
+			$output['mod_str']     = $output['str'];
+			$output['mod_def']     = $output['def'];
+			$output['mod_dex']     = $output['dex'];
+			$output['mod_spd']     = $output['spd'];
+
+			$output['mod_str'] += $output['weapons'][0]['str_mod'];
+			$output['mod_def'] += $output['weapons'][0]['def_mod'];
+			$output['mod_dex'] += $output['weapons'][0]['dex_mod'];
+			$output['mod_spd'] += $output['weapons'][0]['spd_mod'];
 
 			for($i = 0; $i < sizeof($output['armour']); $i++)
 			{
