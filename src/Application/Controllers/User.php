@@ -142,6 +142,7 @@ class User extends Library\BaseController
 			$tmp                   = [];
 			$u                     = $this->_db->getPlayer($this->_params[0], $id_flag);
 			$output                = $this->_db->getClass($u['class']);
+			$output                = $this->_db->getRace($u['race']);
 			$output                = $this->_db->getGear($u['uid']);
 			$output['attack_msg']  = isset($output['weapon'][0]['attack_msg']) ? $output['weapon'][0]['attack_msg'] : 'used their fist to hit';
 			$output['defense_msg'] = 'taking a step back';
@@ -223,8 +224,41 @@ class User extends Library\BaseController
 		$this->_log->set_message("Getting inventory of user " . $this->_params[0], "INFO");
 
 		$output = $this->_db->getUserItems($this->_params[0]);
+		var_dump(json_decode($output['items'][0]['modifier'], true));die;
 
 		return $this->_output->output(200, $output, false);
+	}
+
+	public function useItem()
+	{
+		$this->_log->set_message("calling use of item for user " . $this->_params[0], "INFO");
+
+		//get user id
+		//get item
+		//check if item is in user's inventory
+		//follow modifier for item
+		$output = $this->_db->useItem($this->_params[0], $this->_params[1]);
+		
+
+		return $this->_output->output(200, $output, false);
+	}
+
+	public function rerollStats()
+	{
+		$stats = [];
+		$input = file_get_contents('php://input');
+		$input = explode('&', $input);
+
+		$cid             = explode("=", $input[0])[1];
+		$stats['max_hp'] = explode("=", $input[26])[1];
+		$stats['str']    = explode("=", $input[27])[1];
+		$stats['def']    = explode("=", $input[28])[1];
+		$stats['dex']    = explode("=", $input[29])[1];
+		$stats['spd']    = explode("=", $input[30])[1];
+
+		$this->_db->reroll($stats, $cid);
+
+		return $this->_output->output(200, ['success' => true], false);
 	}
 
 	public function updateCoins()

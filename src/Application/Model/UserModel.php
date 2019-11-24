@@ -162,6 +162,14 @@ class UserModel extends Library\BaseModel
 		$this->_output['class'] = $stmt->fetch(\PDO::FETCH_ASSOC);
 	}
 
+	public function getRace($id)
+	{
+		$stmt = $this->_db->prepare("SELECT * FROM race WHERE id = :id");
+		$stmt->execute([':id' => $id]);
+
+		$this->_output['race'] = $stmt->fetch(\PDO::FETCH_ASSOC);
+	}
+
 	public function getGear($id)
 	{
 		$stmt = $this->_db->prepare("SELECT i.name, i.price, i.level_req, w.str_mod, w.def_mod, w.dex_mod, w.spd_mod, w.attack_msg 
@@ -182,6 +190,49 @@ class UserModel extends Library\BaseModel
 		return $this->_output;
 	}
 
+	public function useItem($uid, $iid)
+	{
+		//does it exist
+		$stmt = $this->_db->prepare("SELECT count(*) AS num FROM item_owned WHERE iid = :iid AND oid = :uid");
+		$stmt->execute(
+			[
+				':iid' => $iid,
+				':uid' => $uid
+			]
+		);
+		$count = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+		if($count['num'] !== 0)
+		{
+			//lookup item's modifer, make the change then remove the item from item_owned
+			$look = $this->_db->prepare("SELECT modifier FROM items WHERE id = :iid");
+			$look->execute([':iid' => $iid]);
+
+			$tmp = json_decode($look->fetch(\PDO::FETCH_ASSOC)['modifier'], true);
+
+			//Need to add a way to stop this from going over max_hp
+			$upd = $this->_db->prepare("UPDATE `character` SET cur_hp = cur_hp + :mod WHERE uid = :uid");
+			$upd->execute(
+				[
+					':mod' => $tmp['cur_hp'],
+					':uid' => $uid
+				]
+			);
+
+			$del = $this->_db->prepare("DELETE FROM item_owned WHERE iid = :iid AND oid = :uid LIMIT 1");
+			$del->execute(
+				[
+					':iid' => $iid,
+					':uid' => $uid
+				]
+			);
+
+			return true;
+		}
+
+		return false;
+	}
+
 	public function getUserItems($name)
 	{
 		$stmt = $this->_db->prepare("SELECT i.id, i.name, i.price, i.level_req, w.str_mod, w.def_mod, w.dex_mod, w.spd_mod, w.attack_msg, o.equipped 
@@ -199,7 +250,7 @@ class UserModel extends Library\BaseModel
 
 		$this->_output['armour'] = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
 
-		$stmt3 = $this->_db->prepare("SELECT i.id, i.name, i.material, i.price, i.level_req FROM `character` as c LEFT JOIN item_owned as o ON c.uid = o.oid LEFT JOIN items 
+		$stmt3 = $this->_db->prepare("SELECT i.id, i.name, i.material, i.price, i.level_req, i.modifier FROM `character` as c LEFT JOIN item_owned as o ON c.uid = o.oid LEFT JOIN items 
 		as i ON o.iid = i.id WHERE username = :uname AND i.type != 'Weapon' AND i.type != 'Armour'");
 		$stmt3->execute([':uname' => $name]);
 
@@ -235,6 +286,21 @@ class UserModel extends Library\BaseModel
 		);
 
 		return true;
+	}
+
+	public function reroll($stats, $cid)
+	{
+		$stmt = $this->_db->prepare("UPDATE `character` SET cur_hp = :hp, max_hp = :hp, str = :str, def = :def, dex = :dex, spd = :spd, reroll_count = reroll_count + 1 WHERE cid = :id LIMIT 1");
+		$stmt->execute(
+			[
+				':hp'  => $stats['max_hp'],
+				':str' => $stats['str'],
+				':def' => $stats['def'],
+				':dex' => $stats['dex'],
+				':spd' => $stats['spd']
+				':id'  => $cid
+			]
+		);
 	}
 
 	public function updatePveStats($cid, $mid, $win)

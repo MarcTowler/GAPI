@@ -51,7 +51,7 @@ class ShopModel extends Library\BaseModel
 	{
 		//need to make sure that the shop has that item and has stock of it, then update the item by removing 1 and adding to the shopkeep's balance
 		$stmt = $this->_db->prepare("SELECT si.qty, i.price, s.balance FROM shop as s LEFT JOIN shop_items as si ON s.sid = si.sid LEFT JOIN items as i on si.iid = i.id " . 
-									"LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :shop and i.id = :id ");
+									"LEFT JOIN npc as n ON n.nid = s.nid WHERE s.sid = :shop AND i.id = :id");
 		$stmt->execute(
 			[
 				':shop' => $sid,
