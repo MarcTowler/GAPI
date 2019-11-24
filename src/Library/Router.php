@@ -18,15 +18,27 @@ namespace API\Library;
 
 class Router
 {
-    private $_segments = [];
+    private $_segments   = [];
     private $_parameters = [];
-    private $_headers = [];
+    private $_headers    = [];
+    private $_request    = '';
 
     public function __construct()
     {
-        $this->getSegments();
-        $this->getParameters();
-        $this->getHeaders();
+        $this->_getSegments();
+        $this->_getParameters();
+        $this->_getHeaders();
+        $this->_requestType();
+    }
+
+    private function _requestType()
+    {
+        $this->_request = $_SERVER['REQUEST_METHOD'];
+    }
+
+    public function getRequestType()
+    {
+        return $this->_request;
     }
 
     private function getURI()
@@ -34,7 +46,7 @@ class Router
         return rtrim(substr($_SERVER['REQUEST_URI'], 1), '/');
     }
 
-    private function getSegments()
+    private function _getSegments()
     {
         $this->_segments = explode('/', $this->getURI());
     }
@@ -49,7 +61,7 @@ class Router
         return ((isset($this->_segments[1]) && $this->_segments[1] != '')) ? $this->_segments[1] : 'main';
     }
 
-    private function getParameters()
+    private function _getParameters()
     {
         if(is_array($this->_segments))
         {
@@ -72,7 +84,7 @@ class Router
         return true;
     }
 
-    private function getHeaders()
+    private function _getHeaders()
     {
         foreach(apache_request_headers() as $key => $val)
         {

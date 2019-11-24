@@ -4,7 +4,7 @@ namespace API\Controllers;
 use API\Library;
 use API\Model;
 
-class Bank extends Library\BaseController
+class Item extends Library\BaseController
 {
     private $_db;
     
@@ -12,7 +12,7 @@ class Bank extends Library\BaseController
     {
         parent::__construct();
 
-        $this->_db = new Model\BankModel();
+        $this->_db = new Model\ItemModel();
     }
 
     public function __destruct()
@@ -20,28 +20,28 @@ class Bank extends Library\BaseController
         parent::__destruct();
     }
 
-    public function openAccount()
+    public function listItems()
     {
 
     }
 
-    public function deposit()
+    public function addItem()
     {
 
     }
 
-    public function withdraw()
+    public function editItem()
     {
 
     }
 
-    public function getBalance()
+    public function deleteItem()
     {
 
     }
 
-    public function heist()
+    public function toggleActive()
     {
-        
+
     }
 }

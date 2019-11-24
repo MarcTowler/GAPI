@@ -4,7 +4,7 @@ namespace API\Controllers;
 use API\Library;
 use API\Model;
 
-class Extension extends Library\BaseController
+class Fight extends Library\BaseController
 {
     private $_db;
     
@@ -12,7 +12,7 @@ class Extension extends Library\BaseController
     {
         parent::__construct();
 
-        $this->_db = new Model\ExtensionModel();
+        $this->_db = new Model\FightModel();
     }
 
     public function __destruct()
@@ -20,13 +20,23 @@ class Extension extends Library\BaseController
         parent::__destruct();
     }
 
-    public function test()
+    public function pveWin()
     {
-        return $this->_output->output(200, ["hey"], false);
+
     }
 
-    public function getUserDetails()
+    public function pveLoss()
     {
 
+    }
+
+    public function pvpWin()
+    {
+
+    }
+
+    public function pvpLoss()
+    {
+        
     }
 }
