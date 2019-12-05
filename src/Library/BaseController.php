@@ -20,6 +20,7 @@ abstract class BaseController
 	protected $_guzzle;
 	protected $_config;
 	protected $_requstType;
+	protected $_twitch;
 
 	public function __construct()
 	{
@@ -32,6 +33,7 @@ abstract class BaseController
 		$this->_headers     = $this->_router->getAllHeaders();
 		$this->_guzzle      = new Client();
 		$this->_requestType = $this->_router->getRequestType();
+		$this->_twitch      = new Twitch();
 	}
 
 	public function __destruct()
