@@ -32,7 +32,51 @@ class User extends Library\BaseController
     }
 
     /**
+     * User::registerUser()
+     *
+     * POST Request
+     *
+     * Register's player data into the system, requires authentication
+     *
+     * @return object JSON Object
+     */
+    public function registerUser()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+		$success = false;
+		$output = '';
+
+		//check that $_POST exists and is not empty
+		if(!isset($data) || empty($data))
+		{
+			return $this->_output->output(400, "No data POSTed to the API", false);
+		} else {
+			$tmp = $this->_db->getUser($data['name'], 0);
+
+			//check if user exists
+			if(is_array($tmp) && $tmp['registered'] == 1)
+			{
+				$output = "User " . $data['name'] . " already exists and is registered";
+               
+                return $this->_output->output(409, $output, false);
+			} else {
+				//bot to handle validation of data before transmission.... Next, lets check the user doesn't exist then submit
+				$success = ($this->_db->registerUser($data, ($this->_headers['user'] == 'discord_bot') ? 0 : 1) == true) ? true : false;
+				$output = "User " . $data['name'] . " has been registered!";
+			}
+		}
+
+		return $this->_output->output(200, $output, false);
+    }
+
+    /**
      * User::getPlayer()
+     *
+     * GET Request
      *
      * Gets player object and returns it as a JSON object, requires authentication
      * @param string|int User identifier
@@ -52,6 +96,7 @@ class User extends Library\BaseController
             return $this->_output->output(400, 'No user id or username specified', false);
         }
 
+        $this->_log->set_message("User::getPlayer() called for identifier: " . $this->_params[0], "INFO");
 
         $output                = [];
         $tmp                   = [];
@@ -72,25 +117,206 @@ class User extends Library\BaseController
         } else {
             return $this->_output->output(404, 'Player not found', false);
         }
-    }
+	}
 
+    /**
+     * User::registerPlayer()
+     *
+     * POST Request
+     *
+     * Register's player data into the system, requires authentication
+     *
+     * @return object JSON Object
+     */
     public function registerPlayer()
     {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
+		$data = file_get_contents('php://input');
+
+		$output = '';
+		$data = json_decode($data, true);
+
+		//check that data exists and is not empty
+		if(!isset($data) || empty($data))
+		{
+			return $this->_output->output(400, "No data POSTed to the API", false);
+		} else {
+			//lets check to see if the player exists already
+			$tmp = $this->_db->getPlayer($data['name'], 0);
+
+			//check if user exists
+			if(is_array($tmp) && $tmp['registered'] == 1)
+			{
+                $output = "User " . $data['name'] . " already exists and is registered";
+                
+                return $this->_output->output(409, $output, false);
+			} else {
+				//bot to handle validation of data before transmission.... Next, lets check the user doesn't exist then submit
+				$success = ($this->_db->registerPlayer($data, ($this->_headers['user'] == 'discord_bot') ? 0 : 1) == true) ? true : false;
+				$output = "User " . $data['name'] . " has been registered!";
+			}
+		}
+
+		return $this->_output->output(200, $output, false);
     }
 
+    /**
+     * User:getCoins()
+     *
+     * GET Request
+     *
+     * Returns the amount of coins for the user
+     *
+     * @param string|int The user identifier
+     * @param int 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     *
+     * @return object JSON object with success/failure response 
+     */
+    public function getCoins()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+		$pouch = $this->_db->getCoins($this->_params[0], $this->_params[1]);
+
+		return $this->_output->output(200, $pouch, true);
+    }
+
+    /**
+     * User:updateCoins()
+     *
+     * POST Request
+     *
+     * Updates the coins for specified user
+     *
+     * @return object JSON object with success/failure response 
+     */
     public function updateCoins()
     {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
+        $input = json_decode(file_get_contents('php://input'), true);
+
+		$char = $this->_db->getPlayer($input['id'], $input['id_type']);
+
+		if($input['result'] === 'Lose')
+		{
+			$input['pouch'] = ($char['pouch'] < $input['pouch']) ? $char['pouch'] : $input['pouch'];
+		}
+
+		$output = $this->_db->updateCoin($char['cid'], $input['pouch'], (($input['result'] == "Win") ? true : false));
+
+		return $this->_output->output(200, $output, false);
     }
 
+    /**
+     * User:updateXP()
+     *
+     * POST Request
+     *
+     * Updates the xp for specified user
+     *
+     * @return object JSON object with success/failure response 
+     */
     public function updateXP()
     {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+        
+		$input = json_decode(file_get_contents('php://input'), true);
+		
+		$char = $this->_db->getPlayer($input['id'], $input['id_type']);
 
+        if($input['result'] === 'lose')
+		{
+			$input['xp'] = ($char['xp'] < $input['xp']) ? $char['xp'] : $input['xp'];
+		}
+
+		$output = $this->_db->updateXP($char['cid'], $input['xp'], (($input['result'] == "Win") ? true : false));
     }
 
-    public function updateStats()
+    /**
+     * User:rerollStats()
+     *
+     * POST Request
+     *
+     * Updates all stats for specified user
+     *
+     * @param array the updated player array
+     *
+     * @return object JSON object with success/failure response 
+     */
+    public function rerollStats()
     {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        $success = $this->_db->reroll($input);
+
+        return $this->_output->output(200, ['success' => $success], false);
+	}
+	
+	/**
+	 * User::xpNeeded()
+	 *
+	 * Returns XP Needed for supplied level
+	 *
+	 * @param int level queried
+	 *
+	 * @return object JSON object specifying XP needed for level provided
+	 */
+	public function xpNeeded()
+	{
+		if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+		if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+		
+		$output = $this->_db->xpNeeded($this->_params[0]);
+
+		return $this->_output->output(200, $output, false);
+	}
+
+    /**
+     * User:levelUp()
+     *
+     * POST Request
+     *
+     * Updates the stats for specified user
+     *
+     * @param array the updated player array
+     *
+     * @return object JSON object with success/failure response 
+     */
+    public function levelUp()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+		$levelUp = false;
+
+		//lets get the user's current level and check against the curve
+		$player = $this->_db->getPlayer($data['cid'], 3);
+
+		$rng = rand(1, 4);
+
+		if(((int)$player['xp'] + $xp) >= $this->_db->xpNeeded($player['level'] + 1))
+		{
+			$levelUp = true;
+			$this->_db->level($player['cid'], $rng);
+		}
+
+
+		if($levelUp == true)
+		{
+			return $this->_output->output(200, ['level up' => true, 'new level' => $player['level'] + 1]);
+		} else {
+			return $this->_output->output(202, ['level up' => false]);
+		}
     }
 }

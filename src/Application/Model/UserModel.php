@@ -156,4 +156,268 @@ class UserModel extends Library\BaseModel
         
         $this->_output['armour'] = $tmp;
     }
+
+    /**
+     * UserModel::registerPlayer()
+     *
+     * Registers a new RPG Player
+     *
+     * @param array The player's stats
+     * @param int Source - 0 = discord, 1 = twitch
+     *
+     * @return array|NULL DB array of results or NULL on fail
+     */
+    public function registerPlayer($playerArray, $source)
+	{
+		//First lets get their user ID then insert them into the character array
+        $user = $this->getUser($playerArray['id'], $source);
+        
+		$stmt = $this->_db->prepare("INSERT INTO `character` (uid, username, level, class, cur_hp, max_hp, cur_ap, max_ap, str, def, dex, spd, pouch, registered) VALUES
+										(:uid, :name, 1, :class, :hp, :hp, :ap, :ap, :str, :def, :dex, :spd, 0, 1) ON DUPLICATE " . 
+										"KEY UPDATE class = :class, cur_hp = :hp, max_hp = :hp, cur_ap = :ap, max_ap = :ap, str = :str, def = :def, dex = :dex, spd = :spd, registered = 1");
+		$stmt->execute(
+            [
+                ':uid'   => $user['uid'],
+                ':name'  => $playerArray['name'],
+                ':class' => $playerArray['class'],
+                ':hp'    => $playerArray['hp'],
+                ':ap'    => $playerArray['ap'],
+                ':str'   => $playerArray['str'],
+                ':def'   => $playerArray['def'],
+                ':dex'   => $playerArray['dex'],
+                ':spd'   => $playerArray['spd']
+		]);
+
+		$success = ($this->_db->lastInsertId() > 0) ? true : false;
+		return $success;
+    }
+
+    /**
+     * UserModel::registerUser()
+     *
+     * Registers a new user and shadow RPG player
+     *
+     * @param array The user's details
+     * @param int Source - 0 = discord, 1 = twitch
+     *
+     * @return array|NULL DB array of results or NULL on fail
+     */
+    public function registerUser($playerArray, $source)
+	{
+		$stmt = $this->_db->prepare("INSERT INTO users (twitch_id, discord_id, name, follower, subscriber, vip, staff) VALUES
+										(:tid, :did, :name, :follow, :sub, :vip, :staff)");
+		$stmt->execute([
+			':tid'    => $playerArray['tid'],
+			':did'    => $playerArray['did'],
+			':name'   => $playerArray['username'],
+			':follow' => $playerArray['follow'],
+			':sub'    => $playerArray['sub'],
+			':vip'    => $playerArray['vip'],
+			':staff'  => $playerArray['staff']
+		]);
+
+		$success = ($this->_db->lastInsertId() > 0) ? true : false;
+
+        if($success)
+        {
+            //Now we create a shadow player account so they can earn coins
+            $ins = $this->_db->prepare("INSERT INTO `character` (uid, username, class, race, level, xp, cur_hp, max_hp, cur_ap, max_ap, str, def, dex, spd, pouch, registered, alpha_tester, beta_tester, reroll_count)"
+                . " VALUES(:uid, :name, 1, 1, 1, 10, 10, 10, 10, 0, 0, 0, 0, 0, :coin, 0, 0, 0, 0)");
+            $ins->execute(
+                [
+                    ':uid'  => $this->_db->lastInsertId(),
+                    ':name' => $playerArray['username'],
+                    ':coin' => ($playerArray['follow'] == 1) ? 100 : 0
+                ]
+            );
+
+            $success = ($this->_db->lastInsertId() > 0) ? true : false;
+        }
+
+		return $success;
+	}
+    
+    /**
+     * UserModel::getUser()
+     *
+     * Pulls user info
+     *
+     * @param array User ID
+     * @param int Source - 0 = discord, 1 = twitch
+     *
+     * @return array|NULL DB array of results or NULL on fail
+     */
+    public function getUser($id, $flag)
+	{
+		$stmt = $this->_db->prepare("SELECT * FROM users WHERE " . ($flag == 0) ? 'discord_id = ' : 'twitch_id = ' . ':id');
+		$stmt->execute([':id' => $id]);
+
+		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+		return $this->_output;
+    }
+    
+    /**
+     * UserModel::level()
+     *
+     * Increase's a player's level and increases a specified stat
+     *
+     * @param int character's id
+     * @param int ID for stat to be modified
+     *
+     * @return bool Success or failure
+     */
+    public function level($id, $stat)
+	{
+		$string = 'UPDATE `character` SET level = level + 1, cur_hp = cur_hp + 3, max_hp = max_hp + 3, cur_ap = cur_ap + 1, max_ap = max_ap + 1,';
+
+		switch($stat)
+		{
+			case 1:
+				$string = $string . "str = str + 1";
+
+				break;
+			case 2:
+				$string = $string . "def = def + 1";
+
+				break;
+			case 3:
+				$string = $string . "dex = dex + 1";
+
+				break;
+			case 4:
+				$string = $string . "spd = spd + 1";
+
+				break;
+		}
+
+		$stmt = $this->_db->prepare($string . " WHERE cid = :user");
+		$stmt->execute([":user" => $id]);
+
+		return true;
+    }
+
+    /**
+     * UserModel::xpNeeded()
+     *
+     * Returns the amount of XP needed to hit specified level
+     *
+     * @param int $level
+     *
+     * @return int The XP Needed for level up
+     */
+    public function xpNeeded($level)
+    {
+        $stmt = $this->_db->prepare("SELECT xp_needed FROM level_xp WHERE level = :level");
+        $stmt->execute([':level' => $level]);
+
+        $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $this->_output;
+    }
+
+    /**
+     * UserModel::reroll()
+     *
+     * Retrieves the value of a user's pouch
+     *
+     * @param array a list of all the stats
+     * @param int character ID
+     *
+     * @return bool true or false
+     */
+    public function reroll($stats, $cid)
+	{
+		$stmt = $this->_db->prepare("UPDATE `character` SET cur_hp = :hp, max_hp = :hp, str = :str, def = :def, dex = :dex, spd = :spd, reroll_count = reroll_count + 1 WHERE cid = :id LIMIT 1");
+		$stmt->execute(
+			[
+				':hp'  => $stats['max_hp'],
+				':str' => $stats['str'],
+				':def' => $stats['def'],
+				':dex' => $stats['dex'],
+				':spd' => $stats['spd'],
+				':id'  => $cid
+			]
+        );
+        
+        return ($stmt->rowCount() > 0) ? true : false;
+    }
+
+    /**
+     * UserModel::getCoins()
+     *
+     * Retrieves the value of a user's pouch
+     *
+     * @param int user identifier
+     * @param int origination flag, 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     *
+     * @return int the number of coins, or 0
+     */
+    public function getCoins($user, $flag)
+	{
+		$stmt = '';
+
+		//We are looking at a username
+        $stmt = $this->_db->prepare('SELECT c.pouch FROM `character` c INNER JOIN users u ON c.uid = u.uid WHERE ' . 
+            (($flag == 0) ? 'c.username = :id' : 
+            (($flag == 1) ? 'u.discord_id = :id' : 
+            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+		$stmt->execute([':id' => $user]);
+
+		$tmp = $stmt->fetch(\PDO::FETCH_ASSOC)['pouch'];
+		$this->_output = (is_null($tmp)) ? 0 : $tmp;
+
+		return $this->_output;
+	}
+
+    /**
+     * UserModel::updateCoin()
+     *
+     * Update's coins in a user's pouch
+     *
+     * @param int character ID
+     * @param int amount to modify
+     * @param bool Increase (true) / decrease (false)
+     *
+     * @return bool success or failure
+     */
+    public function updateCoin($user, $amount, $increase)
+	{
+		$stmt = ($increase == true) ? $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE cid = :user") : 
+								$this->_db->prepare("UPDATE `character` SET pouch = pouch - :amount WHERE cid = :user");
+
+		$stmt->execute(
+			[
+				":user"   => $user,
+				":amount" => $amount
+			]
+		);
+
+		return ($stmt->rowCount() > 0) ? true : false;
+	}
+
+    /**
+     * UserModel::updateXP()
+     *
+     * Update's coins in a user's pouch
+     *
+     * @param int character ID
+     * @param int amount to modify
+     * @param bool Increase (true) / decrease (false)
+     *
+     * @return bool success or failure
+     */
+    public function updateXP($user, $amount, $increase)
+	{
+		$stmt = ($increase == true) ? $this->_db->prepare("UPDATE `character` SET xp = xp + :amount WHERE cid = :user") : 
+								 $this->_db->prepare("UPDATE `character` SET xp = xp - :amount WHERE cid = :user");
+		$stmt->execute(
+			[
+				":user"   => $user,
+				":amount" => $amount
+			]
+		);
+
+		return true;
+	}
 }
