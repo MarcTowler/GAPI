@@ -319,4 +319,21 @@ class User extends Library\BaseController
 			return $this->_output->output(202, ['level up' => false]);
 		}
     }
+
+    /**
+     * User::regen()
+     *
+     * When triggered, all players will end up gaining 1HP and 1AP
+     *
+     * @return object JSON object with success/failure response 
+     */
+    public function regen()
+    {
+        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $output = $this->_db->regen();
+        
+        return $this->_output->output(200, $output, false);
+    }
 }

@@ -419,5 +419,41 @@ class UserModel extends Library\BaseModel
 		);
 
 		return true;
-	}
+    }
+    
+    public function regen($amount = 1)
+    {
+        $stmt = $this->_db->prepare("SELECT cid, cur_hp, cur_ap, max_hp, max_ap FROM `character`");
+        $stmt->execute();
+
+        $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        for($i = 0; $i < count($users); $i++)
+        {
+            if($users[$i]['cur_hp'] < $users[$i]['max_hp'])
+            {
+                $hp = $this->_db->prepare("UPDATE `character` SET cur_hp = cur_hp + :amt WHERE cid = :id");
+                $hp->execute(
+                    [
+                        ':amt' => $amount,
+                        ':id'  => $users[$i]['cid']
+                    ]
+                );
+            }
+
+            if($users[$i]['cur_ap'] < $users[$i]['max_ap']);
+            {
+                $ap = $this->_db->prepare("UPDATE `character` SET cur_ap = cur_ap + :amt WHERE cid = :id");
+                $ap->execute(
+                    [
+                        ':amt' => $amount,
+                        ':id'  => $users[$i]['cid']
+                    ]
+                );
+            }
+
+            $hp = '';
+            $ap = '';
+        }
+    }
 }
