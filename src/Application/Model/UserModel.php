@@ -456,4 +456,19 @@ class UserModel extends Library\BaseModel
             $ap = '';
         }
     }
+
+    public function update_player($type, $change, $id, $flag)
+    {
+        $stmt = $this->_db->prepare("UPDATE `character` c INNER JOIN users u ON u.uid = c.uid SET $type = :change WHERE " .
+            (($flag == 0) ? 'c.username = :id' : 
+            (($flag == 1) ? 'u.discord_id = :id' : 
+            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+        $stmt->execute(
+            [
+                ':id'     => $id,
+                //':type'   => $type,
+                ':change' => $change
+            ]
+        );
+    }
 }

@@ -138,6 +138,7 @@ class Monster extends Library\BaseController
         }
 
         $mon = $this->_db->get_monster(['min' => $min, 'max' => $max]);
+        $mon['ItemDrop'] = $this->getdrops($mon['nid']);
             
         return $this->_output->output(200, $mon, false);
     }
@@ -157,5 +158,34 @@ class Monster extends Library\BaseController
         $this->_db->update_stats($this->_params[0], $this->_params[1]);
 
         return $this->_output->output(200, "Stats Updated", false);
+    }
+
+    private function getdrops($mid, $active = 1, $specific = true)
+    {
+        $rng = (rand(1, 100) / 100);
+
+        $output = $this->_db->get_drops($mid, $active);
+
+        //rate - 1 = 100%, 0.01 = 1% chance of drop
+        //IF RND <= rate drop happened.
+        $dItem = [];
+
+        if($specific)
+        {
+            foreach($output as $drop)
+            {
+                if($drop['rate'] >= $rng)
+                {
+                    $dItem = [
+                        'id' => $drop['iid'],
+                        'name' => $drop['name']
+                    ];
+                }
+            }
+        } else {
+            $dItem = $output;
+        }
+
+        return $dItem;
     }
 }
