@@ -59,6 +59,12 @@ class Fight extends Library\BaseController
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
 		$output['xp']    = $this->_db->updateXP($char['username'], $input['xp'], $input['win']);
 
+        //Check if drops have been issued, if so give them
+        if(!empty($input['drop']) && $input['win'] == true) 
+		{ 
+			$this->_db->giveDrop($char['uid'], $input['drop']); 
+        }
+        
 		//update HP
 		$this->_db->updatePlayer(['cur_hp' => $input['newHP']], $char['cid']);
 
