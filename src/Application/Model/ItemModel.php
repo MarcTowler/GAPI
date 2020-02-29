@@ -279,4 +279,14 @@ class ItemModel extends Library\BaseModel
 
 		return ($stmt->rowCount() > 0) ? true : false;
 	}
+
+	public function getItem($id)
+	{
+		$stmt = $this->_db->prepare("SELECT * FROM items WHERE id = :id");
+		$stmt->execute([':id' => $id]);
+
+		$output = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+		return $output;
+	}
 }

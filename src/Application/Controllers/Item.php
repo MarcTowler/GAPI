@@ -31,7 +31,7 @@ class Item extends Library\BaseController
      */
     public function listItems()
     {
-        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $output = $this->_db->listItems();
@@ -205,5 +205,15 @@ class Item extends Library\BaseController
 		$output = $this->_db->equipItem($user, $iid, false);
 
 		return $this->_output->output(200, $output, false);
+    }
+
+    public function getItem()
+    {
+        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $output = $this->_db->getItem($this->_params[0]);
+
+        return $this->_output->output(200, $output, false);
     }
 }
