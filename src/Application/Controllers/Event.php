@@ -4,7 +4,7 @@ namespace API\Controllers;
 use API\Library;
 use API\Model;
 
-class Extension extends Library\BaseController
+class Event extends Library\BaseController
 {
     private $_db;
     
@@ -12,7 +12,7 @@ class Extension extends Library\BaseController
     {
         parent::__construct();
 
-        $this->_db = new Model\ExtensionModel();
+        $this->_db = new Model\EventModel();
     }
 
     public function __destruct()
@@ -20,13 +20,10 @@ class Extension extends Library\BaseController
         parent::__destruct();
     }
 
-    public function test()
+    public function ListEvents()
     {
-        return $this->_output->output(200, ["hey"], false);
-    }
+        $output = $this->_db->getEventList();
 
-    public function getUserDetails()
-    {
-
+        return $this->_output->output(200, $output, false);
     }
 }

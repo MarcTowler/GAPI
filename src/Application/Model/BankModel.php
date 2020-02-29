@@ -1,154 +1,142 @@
 <?php
+/**
+ * Bank Model
+ *
+ * All Bank related database called are stored here
+ *
+ * @package		GAPI
+ * @author		Marc Towler <marc@marctowler.co.uk>
+ * @copyright	Copyright (c) 2019 Marc Towler
+ * @link		https://gapi.itslit.uk
+ * @since       Version 1.0
+ */
 namespace API\Model;
 
 use API\Library;
 
 class BankModel extends Library\BaseModel
 {
+    public function __construct()
+    {
+		    parent::__construct();
+    }
 
-	public function __construct()
-	{
-		parent::__construct();
-	}
-	
-	public function withdraw($uuid, $amount)
-	{
-		$existing = $this->_link($this->_getUID($uuid)['uid']);
+    /**
+     * Bank::deposit()
+     *
+     * Deposits gold to the specified user's account
+     *
+     * @param int User ID
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     * @param int Amount to deposit
+     *
+     * @return bool success or failure
+     */
+    public function deposit($id, $flag, $amount)
+    {
+        //first off we need to check what coins the player has on them
+        $stmt = $this->_db->prepare("UPDATE bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid SET b.balance = b.balance + :amt, c.pouch = c.pouch - :amt WHERE " .
+            (($flag == 0) ? 'c.username = :id' : 
+            (($flag == 1) ? 'u.discord_id = :id' : 
+            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+        $stmt->execute([':id' => $id]);
+        
+        $success = ($stmt->rowCount() > 0) ? true : false;
 
-		if($existing === false)
-		{
-			return ['success' => false, 'reason' => "no account"];
-		} else {
-			//check the user actually has enough coins to withdraw
-			$bal = $this->_db->prepare("SELECT balance FROM bank WHERE uid = :uuid");
-			$bal->execute([':uuid' => $existing['uid']]);
-			$balance = $bal->fetch(\PDO::FETCH_ASSOC);
+        
+    }
 
-			$balance = ($balance == false) ? 0 : $balance['balance'];
+    /**
+     * Bank::withdraw()
+     *
+     * Withdraws gold from the specified user's account
+     *
+     * @param int User ID
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     * @param int Amount to withdraw
+     *
+     * @return bool success or failure
+     */
+    public function withdraw($id, $type, $amount)
+    {
+        $upd = $this->_db->prepare("UPDATE bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid SET b.balance = b.balance - :amt, c.pouch = c.pouch + :amt WHERE " .
+            (($flag == 0) ? 'c.username = :id' : 
+            (($flag == 1) ? 'u.discord_id = :id' : 
+            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+        $upd->execute([':id' => $id]);
 
-			if(($balance - $amount) < 0)
-			{
-				$this->_output = ['success' => false, 'reason' => "lack of funds", 'balance' => $total];
-			} else {
-				$stmt = $this->_db->prepare("UPDATE `character` SET pouch = pouch + :amount WHERE uid = :uuid");
-				$stmt->execute(
-					[
-						':uuid'   => $existing['uid'],
-						':amount' => $amount
-					]
-				);
-				
-				$bank = $this->_db->prepare("UPDATE bank SET balance = :newbal WHERE uid = :uuid");
-				$bank->execute(
-					[
-						':uuid'   => $existing['uid'],
-						':newbal' => ($balance - $amount)
-					]
-				);
+        $success = ($upd->rowCount() > 0) ? true : false;
+      }
 
-				$this->_output = ['success' => true, 'amount' => $amount];
-			}
+    /**
+     * Bank::checkBalance()
+     *
+     * Returns user's bank balance
+     *
+     * @param int User ID
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     *
+     * @return int Amount of gold or 0
+     */
+    public function checkBalance($id, $flag)
+    {
+        $stmt = $this->_db->prepare("SELECT b.balance FROM bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid WHERE " . 
+            (($flag == 0) ? 'c.username = :id' : 
+            (($flag == 1) ? 'u.discord_id = :id' : 
+            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+        $stmt->execute([':id' => $id]);
 
-			return $this->_output;
-		}
-	}
+        $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-	public function deposit($uuid, $amount)
-	{
-		$uid      = $this->_getUID($uuid)['uid'];
-		$existing = $this->_link($uid);
+        return ($this->_output) ? $this->_output : ['success' => false, 'reason' => "no account"];
+    }
 
-		if($existing == false)
-		{
-			return ['success' => false, 'reason' => "no account"];
-		} else {
-			$pouch = $this->_db->prepare("SELECT pouch FROM `character` WHERE uid = :uuid");
-			$pouch->execute([':uuid' => $existing['uid']]);
+    /**
+     * Bank::openAccount()
+     *
+     * Creates a bank account for a user
+     *
+     * @param int User ID
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = uid
+     *
+     * @return array success or failure error
+     */
+    public function openAccount($id, $flag)
+    {
+        try {
+            $ins = $this->_db->prepare("INSERT INTO bank (uid, balance, protected) VALUES (
+                (SELECT c.cid FROM `character` c INNER JOIN users u ON c.uid = u.uid WHERE " . 
+                (($flag == 0) ? "c.username = :id" : 
+                (($flag == 1) ? "u.discord_id = :id" : 
+                (($flag == 2) ? "u.twitch_id = :id" : "c.uid = :id"))) . ", 0, 0)");
+            $ins->execute([':id' => $id]);
 
-			$total = $pouch->fetch(\PDO::FETCH_ASSOC);
+            return ['success' => true];
+        } catch(\PDOEXCEPTION $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
 
-			$total = ($total == false) ? 0 : $total['pouch'];
+    /**
+     * Bank::getPouch()
+     *
+     * Not for a bank but allows to easily pull pouch for comparison
+     *
+     * @param int User ID
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = uid
+     *
+     * @return array success or failure error
+     */
+    public function getPouch($id, $flag)
+    {
+        $stmt = $this->_db->prepare("SELECT c.pouch FROM `character` c INNER JOIN users u ON c.uid = u.uid WHERE " . 
+            (($flag == 0) ? "c.username = :id" : 
+            (($flag == 1) ? "u.discord_id = :id" : 
+            (($flag == 2) ? "u.twitch_id = :id" : "c.uid = :id"))) . ", 0, 0)");
+        $stmt->execute([':id' => $id]);
 
-			if(($total - $amount) < 0)
-			{
-				$this->_output = ['success' => false, 'reason' => "lack of funds", 'balance' => $total];
-			} else {
-				try {
-					$bank = $this->_db->prepare("UPDATE bank SET balance = balance + :deposit WHERE uid = :uuid");
-					$bank->execute(
-						[
-							':uuid'    => $existing['uid'],
-							':deposit' => $amount
-						]
-					);
+        $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-					$pouch = $this->_db->prepare("UPDATE `character` SET pouch = :newbal WHERE uid = :uuid");
-					$pouch->execute(
-						[
-							':uuid'   => $existing['uid'],
-							':newbal' => ($total - $amount)
-						]
-					);
-
-					$this->_output = ['success' => true, 'amount' => $amount];
-				} catch(\PDOException $e) {
-					$this->_output = ['success' => false, 'reason' => 'no bank account'];
-				}
-			}
-
-			return $this->_output;
-		}
-	}
-
-	public function open_account($uuid)
-	{
-		$uid      = $this->_getUID($uuid);
-		$existing = $this->_link($uid['uid']);
-
-		if($existing == false)
-		{
-			try {
-				$stmt = $this->_db->prepare("INSERT INTO bank (uid, balance, protected) VALUES (:uuid, 0, 0)");
-				$stmt->execute([':uuid' => $uid['uid']]);
-			} catch(\PDOException $e) {
-				var_dump($e->getMessage());
-			}
-			return ['success' => true];
-		} else {
-			return ['success' => false];
-		}
-	}
-
-	public function check_balance($uuid)
-	{
-		$existing = $this->_link($this->_getUID($uuid)['uid']);
-
-		if($existing === false)
-		{
-			return ['success' => false, 'reason' => "no account"];
-		} else {
-			$stmt = $this->_db->prepare("SELECT balance FROM bank WHERE uid = :uuid");
-			$stmt->execute([':uuid' => $existing['uid']]);
-
-			$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
-		}
-
-		return $this->_output;
-	}
-
-	private function _link($uuid)
-	{
-		$check = $this->_db->prepare("SELECT b.uid FROM bank b INNER JOIN `character` c ON b.uid = c.uid WHERE c.uid = :uuid");
-		$check->execute([':uuid' => $uuid]);
-
-		return $check->fetch(\PDO::FETCH_ASSOC);
-	}
-
-	private function _getUID($uuid)
-	{
-		$check = $this->_db->prepare("SELECT uid FROM users WHERE twitch_id = :uuid OR discord_id = :uuid");
-		$check->execute([':uuid' => $uuid]);
-
-		return $check->fetch(\PDO::FETCH_ASSOC);
-	}
+        return $this->_output;
+    }
 }

@@ -20,42 +20,111 @@ class Bank extends Library\BaseController
         parent::__destruct();
     }
 
+    /**
+     * Bank::deposit()
+     *
+     * POST Request
+     *
+     * Deposit into a player's bank
+     *
+     * @return object JSON Object
+     */
     public function deposit()
     {
-        if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if(!isset($data) || empty($data))
         {
-            return $this->_output->output(401, "Authorization Failed", false);
+            return $this->_output->output(400, "No data POSTed to the API", false);
         }
 
-        return $this->_output->output(200, json_encode($this->_db->deposit($this->_params[0], $this->_params[1])), true);
-    }
+        $pouch = $this->_db->getPouch($data['id'], $data['type'])['pouch'];
 
-    public function withdraw()
-    {
-        if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
+        if($pouch < $data['amount'])
         {
-            return $this->_output->output(401, "Authorization Failed", false);
+            return $this->_output->output(400, "Insufficient balance to deposit", false);
         }
-
-        return $this->_output->output(200, json_encode($this->_db->withdraw($this->_params[0], $this->_params[1])), true);
-    }
-
-    public function balance()
-    {
-        $this->_log->set_message("checking bank balance for user with discord id of " . $this->_params[0], "INFO");
-
-        $output = $this->_db->check_balance($this->_params[0]);
         
+        $output = $this->_db->deposit($data['id'], $data['type'], $data['amount']);
+
         return $this->_output->output(200, $output, false);
     }
 
-    public function open()
+    /**
+     * Bank::withdraw()
+     *
+     * POST Request
+     *
+     * Withdraw from a player's bank
+     *
+     * @return object JSON Object
+     */
+    public function withdraw()
     {
-        if($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4)
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        if(!isset($data) || empty($data))
         {
-            return $this->_output->output(401, "Authorization Failed", false);
+            return $this->_output->output(400, "No data POSTed to the API", false);
         }
 
-        return $this->_output->output(200, json_encode($this->_db->open_account($this->_params[0])), true);
+        //lets get the balance and check we can do this
+        $bal = $this->_db->checkBalance($data['id'], $data['type']);
+
+        if($bal < $data['amount'])
+        {
+            return $this->_output->output(400, "Insufficient balance to withdraw", false);
+        }
+
+        $output = $this->_db->withdraw($data['id'], $data['type'], $data['amount']);
+
+        return $this->_output->output(200, $output, false);
+    }
+
+    /**
+     * Bank::balance()
+     *
+     * GET Request
+     *
+     * Check the balance of a player
+     *
+     * @return object JSON Object
+     */
+    public function balance()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $output = $this->_db->checkBalance($this->_params[0], $this->_params[1]);
+
+        return (isset($output['success'])) ? $this->_output->output(404, $output, false) : $this->_output->output(200, $output, false);
+    }
+
+    /**
+     * Bank::open()
+     *
+     * POST Request
+     *
+     * Open an account for a user, will fail on duplicate
+     *
+     * @return object JSON Object
+     */
+    public function open()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        if(!isset($data) || empty($data))
+        {
+            return $this->_output->output(400, "No data POSTed to the API", false);
+        }
+
+        $output = $this->_db->openAccount($data['id'], $data['type']);
+
+        return $this->_output->output(200, $output, false);
     }
 }

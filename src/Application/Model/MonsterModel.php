@@ -11,6 +11,7 @@ class MonsterModel extends Library\BaseModel
 		parent::__construct();
     }
 
+    
     public function get_monster($level_range)
     {
         if(!is_array($level_range))
@@ -49,5 +50,17 @@ class MonsterModel extends Library\BaseModel
         $stmt->execute([':npc' => $id]);
 
         return true;
+    }
+
+    public function get_drops($mid, $active = 1)
+    {
+        $stmt = ($active == 1) ? $this->_db->prepare("SELECT d.iid, d.msg, d.rate, i.name FROM mon_drops d INNER JOIN items i ON d.iid = i.id WHERE d.mid = :mid AND d.active = 1") 
+                               : $this->_db->prepare("SELECT d.iid, d.msg, d.rate, i.name FROM mon_drops d INNER JOIN items i ON d.iid = i.id WHERE d.mid = :mid");
+
+        $stmt->execute([':mid' => $mid]);
+
+        $output = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $output;
     }
 }

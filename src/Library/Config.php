@@ -86,7 +86,7 @@ class Config
                 throw new \Exception("config::database needs settings, check your config");
             } else {
                 $this->db = new \PDO("mysql:host=" . $this->site['DBHOST'] . ";port=" . $this->site['PORT'] .
-                    ";dbname=" . $this->site['DBNAME'], $this->site['DBUSER'], $this->site['DBPASS']);
+                    ";dbname=" . $this->site['DBNAME'] . ";charset=utf8", $this->site['DBUSER'], $this->site['DBPASS']);
                 $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             }
         } else {
