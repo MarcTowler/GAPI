@@ -7,12 +7,14 @@ use API\Model;
 class Fight extends Library\BaseController
 {
     private $_db;
+    private $_user;
     
     public function __construct()
     {
         parent::__construct();
 
-        $this->_db = new Model\FightModel();
+        $this->_db   = new Model\FightModel();
+        $this->_user = new Model\UserModel();
     }
 
     public function __destruct()
@@ -49,11 +51,14 @@ class Fight extends Library\BaseController
     public function pveLoss()
     {
         $input = json_decode(file_get_contents('php://input'), true);
-		$char = $this->_db->getPlayer($input['discord_id'], 1);
+		$char = $this->_user->getPlayer($input['discord_id'], 1); //Need to bring this into here or call the user one maybe?
+
+        $min_xp = $this->_user->xpNeeded($char['level'])['xp_needed']);
 
 		$input['pouch'] = ($char['pouch'] < $input['pouch']) ? $char['pouch'] : $input['pouch'];
-		$input['xp'] = ($char['xp'] < $input['xp']) ? $char['xp'] : $input['xp'];
-
+        $input['xp'] = ($char['xp'] < $input['xp']) ? $char['xp'] : $input['xp'];
+        
+        $input['xp'] = ($input['xp'] < $min_xp) ? $min_xp : $input['xp'];
 
 		$this->_log->set_message("pveLoss called for " . $char['username'] . " for " . $input['pouch'] . " litcoins", "INFO");
 		$output['coins'] = $this->_db->updateCoin($char['username'], $input['pouch'], $input['win']);
