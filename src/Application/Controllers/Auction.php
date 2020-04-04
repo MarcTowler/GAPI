@@ -29,7 +29,7 @@ class Auction extends Library\BaseController
 
         $input = json_decode(file_get_contents('php://input'), true);
 
-        
+        var_dump($input);
     }
 
     public function EditAuction()
@@ -54,7 +54,7 @@ class Auction extends Library\BaseController
 
     public function ListAuctions()
     {
-        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $result = $this->_db->list();
@@ -74,7 +74,7 @@ class Auction extends Library\BaseController
 
         $result = $this->_db->getSingle($this->_params[0]);
 
-        return $this->_output->output(200, $result, false);
+        return ($result == false) ? $this->_output->output(404, "Auction ID not valid", false) : $this->_output->output(200, $result, false);
     }
 
     public function Bid()
@@ -103,11 +103,11 @@ class Auction extends Library\BaseController
 
         $top = $this->_db->getSingle($input['aid']);
 
-        if($input['bid_amount'] <= $top['amount'])
+        if($input['bid_amount'] <= (int)$top['top_bid'])
         {
-            return $this->_output->output(400, ['message' => "Your bid must be higher then the current bid!"]);
+            return $this->_output->output(406, ['message' => "Your bid must be higher then the current bid!"]);
         } else if(!$top['active']) {
-            return $this->_output->output(400, ['message' => "The auction is not active!"]);
+            return $this->_output->output(410, ['message' => "The auction is not active!"]);
         }
 
         //All checks have passed lets please the bid!
@@ -128,7 +128,7 @@ class Auction extends Library\BaseController
 
     public function CronCheck()
     {
-        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $result = $this->_db->list();
@@ -144,7 +144,7 @@ class Auction extends Library\BaseController
             {
                 $top = $this->_EndAuction($result[$i]['aid']);
             } else if($result[$i]['active'] == false) {
-                return $this->_output->output(410, "Auction Ended", false);
+                //return $this->_output->output(410, "Auction Ended", false);
             }
         }
 
@@ -164,6 +164,9 @@ class Auction extends Library\BaseController
             'POST',
             'https://marctowler-discord-rpg-bot.glitch.me/auction', 
             [
+                'headers' => [
+                    'content-type' => "application/json; charset=utf-8"
+                ],
                 'body' => json_encode($result)
             ]
         );
