@@ -58,6 +58,21 @@ abstract class BaseController
 	{
 		if(!isset($this->_headers['token']) || ($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4))
         {
+			//No header, could be QS based. Lets see how big _params is and take the last value
+			if($this->_params[sizeof($this->_params)-1][0] === '?')
+			{
+				$string = explode("&",ltrim($this->_params[sizeof($this->_params)-1], $this->_params[sizeof($this->_params)-1][0]));
+
+				$this->_headers['user']  = explode("=", $string[0])[1];
+				$this->_headers['token'] = explode("=", $string[1])[1];
+
+				if(!isset($this->_headers['token']) || ($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4))
+        		{
+					return false;
+				} else {
+					return true;
+				}
+			}
             $this->_log->set_message("Authentication failed", "ERROR");
 
 			return false;
