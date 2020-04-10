@@ -308,7 +308,7 @@ class User extends Library\BaseController
 		if(((int)$player['xp'] + $xp) >= $this->_db->xpNeeded($player['level'] + 1))
 		{
 			$levelUp = true;
-			$this->_db->level($player['cid'], $rng);
+			$this->_db->level($player['uid'], $rng);
 		}
 
 
@@ -335,5 +335,86 @@ class User extends Library\BaseController
         $output = $this->_db->regen();
         
         return $this->_output->output(200, $output, false);
+    }
+
+    /**
+     * User::toggleStatus()
+     * 
+     * When triggered, it will update the status flag for the user on gathering/travelling which will lock/unlock features
+     * 
+     * @return object JSON object with success/failure response
+     */
+    public function toggleStatus()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $output = $this->_db->toggleStatus($this->_params[0], $this->_params[1]);
+        
+        return $this->_output->output(200, $output, false);
+    }
+
+    public function updatePlayer()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        switch($data['request'])
+        {
+            case 'avatar':
+                break;
+            case 'name':
+                $output = $this->_db->update_player('username', $data['new'], $data['id'], $data['flag']);
+
+                break;
+            case 'race':
+                $output = $this->_db->update_player('race', $data['new'], $data['id'], $data['flag']);
+                break;
+            case 'class':
+                $output = $this->_db->update_player('class', $data['new'], $data['id'], $data['flag']);
+                break;
+            case 'gender':
+                $output = $this->_db->update_player('gender', $data['new'], $data['id'], $data['flag']);
+
+                break;
+        }
+
+        return $this->_output->output(200, $output, false);
+    }
+
+    public function listPlayers()
+    {
+        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $result = $this->_db->listAllPlayers();
+
+        return $this->_output->output(200, $result, false);
+    }
+
+    public function gather()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $user = $this->_db->getPlayer($this->_params[0], $this->_params[1]);
+
+        $result = $this->_db->toggleStatus($user['uid'], 'gathering');
+
+        return $this->_output->output(200, $result, false);
+    }
+
+    public function travel()
+    {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $user = $this->_db->getPlayer($this->_params[0], $this->_params[1]);
+
+        $result = $this->_db->toggleStatus($user['uid'], 'travelling');
+
+        return $this->_output->output(200, $result, false);
     }
 }
