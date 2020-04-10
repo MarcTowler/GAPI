@@ -138,7 +138,11 @@ class Monster extends Library\BaseController
         }
 
         $mon = $this->_db->get_monster(['min' => $min, 'max' => $max]);
-        $mon['ItemDrop'] = $this->getdrops($mon['nid']);
+
+        $mon['ItemDrop']  = $this->getdrops($mon['nid']);
+
+        $this->_params[0] = $mon['name'];
+        $mon['Info']      = json_decode($this->getMonster(),true)['response'];
             
         return $this->_output->output(200, $mon, false);
     }
