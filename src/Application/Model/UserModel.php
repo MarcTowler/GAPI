@@ -209,7 +209,8 @@ class UserModel extends Library\BaseModel
      *
      * @return array|NULL DB array of results or NULL on fail
      */
-   /*  public function registerUser($playerArray, $source)
+   /*  
+   public function registerUser($playerArray, $source)
 	{
 		$stmt = $this->_db->prepare("INSERT INTO users (twitch_id, discord_id, name, follower, subscriber, vip, staff) VALUES
 										(:tid, :did, :name, :follow, :sub, :vip, :staff)");
@@ -365,7 +366,7 @@ class UserModel extends Library\BaseModel
 		$stmt = '';
 
 		//We are looking at a username
-        $stmt = $this->_db->prepare('SELECT c.pouch FROM users WHERE ' . 
+        $stmt = $this->_db->prepare('SELECT pouch FROM users WHERE ' . 
             (($flag == 0) ? 'username = :id' : 
             (($flag == 1) ? 'discord_id = :id' : 
             (($flag == 2) ? 'twitch_id = :id' : 'uid = :id'))));
@@ -390,8 +391,8 @@ class UserModel extends Library\BaseModel
      */
     public function updateCoin($user, $amount, $increase)
 	{
-		$stmt = ($increase == true) ? $this->_db->prepare("UPDATE users SET pouch = pouch + :amount WHERE uid = :user") : 
-								$this->_db->prepare("UPDATE users SET pouch = pouch - :amount WHERE uid = :user");
+		$stmt = ($increase == true) ? $this->_db->prepare("UPDATE users SET pouch = pouch + :amount WHERE uid = :user AND gathering = 0 AND travelling = 0") : 
+								$this->_db->prepare("UPDATE users SET pouch = pouch - :amount WHERE uid = :user AND gathering = 0 AND travelling = 0");
 
 		$stmt->execute(
 			[
@@ -430,7 +431,7 @@ class UserModel extends Library\BaseModel
     
     public function regen($amount = 1)
     {
-        $stmt = $this->_db->prepare("SELECT uid, cur_hp, cur_ap, max_hp, max_ap FROM users");
+        $stmt = $this->_db->prepare("SELECT uid, cur_hp, cur_ap, max_hp, max_ap FROM users WHERE cur_hp > 0 AND gathering = 0 AND travelling = 0");
         $stmt->execute();
 
         $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -480,16 +481,30 @@ class UserModel extends Library\BaseModel
 
     public function update_player($type, $change, $id, $flag)
     {
-        $stmt = $this->_db->prepare("UPDATE users u SET $type = :change WHERE " .
-            (($flag == 0) ? 'u.username = :id' : 
-            (($flag == 1) ? 'u.discord_id = :id' : 
-            (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
-        $stmt->execute(
-            [
-                ':id'     => $id,
-                //':type'   => $type,
-                ':change' => $change
-            ]
-        );
+        try {
+            $stmt = $this->_db->prepare("UPDATE users u SET $type = :change WHERE " .
+                (($flag == 0) ? 'u.username = :id' : 
+                (($flag == 1) ? 'u.discord_id = :id' : 
+                (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
+            $stmt->execute(
+                [
+                    ':id'     => $id,
+                    //':type'   => $type,
+                    ':change' => $change
+                ]
+            );
+
+            return true;
+        } catch(\PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    public function listAllPlayers()
+    {
+        $stmt = $this->_db->prepare("Select * FROM users");
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
