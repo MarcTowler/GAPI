@@ -432,6 +432,7 @@ class UserModel extends Library\BaseModel
     public function regen($amount = 1)
     {
         $stmt = $this->_db->prepare("SELECT uid, cur_hp, cur_ap, max_hp, max_ap FROM users WHERE cur_hp > 0 AND gathering = 0 AND travelling = 0");
+
         $stmt->execute();
 
         $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
