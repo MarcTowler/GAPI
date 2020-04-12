@@ -451,4 +451,14 @@ class User extends Library\BaseController
 
         return $this->_output->output(200, $race, false);
     }
+
+    public function getInventory()
+	{
+		if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+		$output = $this->_db->getUserItems($this->_params[0]);
+
+		return $this->_output->output(200, $output, false);
+	}
 }
