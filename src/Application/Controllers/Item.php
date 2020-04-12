@@ -7,12 +7,14 @@ use API\Model;
 class Item extends Library\BaseController
 {
     private $_db;
+    private $_user;
     
     public function __construct()
     {
         parent::__construct();
 
-        $this->_db = new Model\ItemModel();
+        $this->_db   = new Model\ItemModel();
+        $this->_user = new Model\UserModel();
     }
 
     public function __destruct()
@@ -31,7 +33,7 @@ class Item extends Library\BaseController
      */
     public function listItems()
     {
-        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $output = $this->_db->listItems();
@@ -72,6 +74,9 @@ class Item extends Library\BaseController
      */
     public function editItem()
     {
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+        
         return $this->_output->output(501, "Function not implemented", false);
 
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
@@ -138,9 +143,9 @@ class Item extends Library\BaseController
     {
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
-        if(count($this->_params) < 2) { return $this->_output->output(400, "Not enough Arguments provided", false); }
+        if(count($this->_params) < 3) { return $this->_output->output(400, "Not enough Arguments provided", false); }
 
-        $output = $this->_db->useItem($this->_params[0], $this->_params[1]);
+        $output = $this->_db->useItem($this->_user->getPlayer($this->_params[0], $this->_params[1])['uid'], $this->_params[2]);
 
         switch($output)
         {
@@ -209,7 +214,7 @@ class Item extends Library\BaseController
 
     public function getItem()
     {
-        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $output = $this->_db->getItem($this->_params[0]);

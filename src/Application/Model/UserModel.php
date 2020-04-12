@@ -53,7 +53,7 @@ class UserModel extends Library\BaseModel
 
             $this->_output['race'] = $race->fetch(\PDO::FETCH_ASSOC);
 
-            $this->getGear($this->_output['cid']);
+            $this->getGear($this->_output['uid']);
         }
 
         return $this->_output;
@@ -170,81 +170,35 @@ class UserModel extends Library\BaseModel
      */
     public function registerPlayer($playerArray, $source)
 	{
-		//First lets get their user ID then insert them into the character array
+		//Check to see if they have a userID, if so update else insert
         $user = $this->getUser($playerArray['id'], $source);
         
-		$stmt = $this->_db->prepare("INSERT INTO users (twitch_id, discord_id, follower, subscriber, vip, staff, username, level, class, cur_hp, max_hp, cur_ap, max_ap, str, def, dex, spd, pouch, registered) VALUES
-										(:tid, :did, :follow, :sub, :vip, :staff, :name, 1, :class, :hp, :hp, :ap, :ap, :str, :def, :dex, :spd, 0, 1) ON DUPLICATE " . 
-										"KEY UPDATE class = :class, cur_hp = :hp, max_hp = :hp, cur_ap = :ap, max_ap = :ap, str = :str, def = :def, dex = :dex, spd = :spd, registered = 1");
-		$stmt->execute(
+        $stmt = $this->_db->prepare("INSERT INTO users (twitch_id, discord_id, follower, subscriber, vip, username, level, class, race, cur_hp, max_hp, cur_ap, max_ap, str, def, dex, spd, pouch, registered) VALUES
+									(:tid, :did, :follow, :sub, :vip, :name, 1, :class, :race, :hp, :hp, :ap, :ap, :str, :def, :dex, :spd, 0, 1) ON DUPLICATE " . 
+                                    "KEY UPDATE class = :class, race = :race, cur_hp = :hp, max_hp = :hp, cur_ap = :ap, max_ap = :ap, str = :str, def = :def, dex = :dex, spd = :spd, pouch = 0, registered = 1");
+        $stmt->execute(
             [
-                ':tid'    => $playerArray['tid'],
-			    ':did'    => $playerArray['did'],
+                ':tid'    => ($source == 0) ? NULL : $playerArray['id'],
+                ':did'    => ($source == 0) ? $playerArray['id'] : NULL,
                 ':name'   => $playerArray['name'],
-                ':follow' => $playerArray['follow'],
-			    ':sub'    => $playerArray['sub'],
-			    ':vip'    => $playerArray['vip'],
-			    ':staff'  => $playerArray['staff'],
+                ':follow' => ($source == 0) ? 0 : $playerArray['follow'],
+                ':sub'    => ($source == 0) ? 0 : $playerArray['sub'],
+                ':vip'    => ($source == 0) ? 0 : $playerArray['vip'],
                 ':class'  => $playerArray['class'],
+                ':race'   => $this->getRace($playerArray['race'], false)['id'],
                 ':hp'     => $playerArray['hp'],
                 ':ap'     => $playerArray['ap'],
                 ':str'    => $playerArray['str'],
                 ':def'    => $playerArray['def'],
                 ':dex'    => $playerArray['dex'],
                 ':spd'    => $playerArray['spd']
-		]);
+            ]
+        );
 
-		$success = ($this->_db->lastInsertId() > 0) ? true : false;
-		return $success;
+    	$success = ($this->_db->lastInsertId() > 0) ? true : false;
+	    return $success;
     }
 
-    /**
-     * UserModel::registerUser()
-     *
-     * Registers a new user and shadow RPG player
-     * @todo update to work with new DB layout
-     *
-     * @param array The user's details
-     * @param int Source - 0 = discord, 1 = twitch
-     *
-     * @return array|NULL DB array of results or NULL on fail
-     */
-   /*  
-   public function registerUser($playerArray, $source)
-	{
-		$stmt = $this->_db->prepare("INSERT INTO users (twitch_id, discord_id, name, follower, subscriber, vip, staff) VALUES
-										(:tid, :did, :name, :follow, :sub, :vip, :staff)");
-		$stmt->execute([
-			':tid'    => $playerArray['tid'],
-			':did'    => $playerArray['did'],
-			':name'   => $playerArray['username'],
-			':follow' => $playerArray['follow'],
-			':sub'    => $playerArray['sub'],
-			':vip'    => $playerArray['vip'],
-			':staff'  => $playerArray['staff']
-		]);
-
-		$success = ($this->_db->lastInsertId() > 0) ? true : false;
-
-        if($success)
-        {
-            //Now we create a shadow player account so they can earn coins
-            $ins = $this->_db->prepare("INSERT INTO `character` (uid, username, class, race, level, xp, cur_hp, max_hp, cur_ap, max_ap, str, def, dex, spd, pouch, registered, alpha_tester, beta_tester, reroll_count)"
-                . " VALUES(:uid, :name, 1, 1, 1, 10, 10, 10, 10, 0, 0, 0, 0, 0, :coin, 0, 0, 0, 0)");
-            $ins->execute(
-                [
-                    ':uid'  => $this->_db->lastInsertId(),
-                    ':name' => $playerArray['username'],
-                    ':coin' => ($playerArray['follow'] == 1) ? 100 : 0
-                ]
-            );
-
-            $success = ($this->_db->lastInsertId() > 0) ? true : false;
-        }
-
-		return $success;
-	} */
-    
     /**
      * UserModel::getUser()
      *
@@ -257,7 +211,12 @@ class UserModel extends Library\BaseModel
      */
     public function getUser($id, $flag)
 	{
-		$stmt = $this->_db->prepare("SELECT * FROM users WHERE " . ($flag == 0) ? 'discord_id = ' : 'twitch_id = ' . ':id');
+        if($flag == 0)
+        {
+            $stmt = $this->_db->prepare("SELECT * FROM users WHERE discord_id = :id");
+        } else {
+            $stmt = $this->_db->prepare("SELECT * FROM users WHERE twitch_id = :id");
+        }            
 		$stmt->execute([':id' => $id]);
 
 		$this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -508,4 +467,46 @@ class UserModel extends Library\BaseModel
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getRace($raceID, $id = true)
+    {
+        if($id == true)
+        {
+            $stmt = $this->_db->prepare("SELECT * FROM race WHERE id = :id");
+            $stmt->execute([':id' => $raceID]);
+        } else {
+            $stmt = $this->_db->prepare("SELECT * FROM race WHERE name = :id");
+            $stmt->execute([':id' => $raceID]);
+        }    
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $result;
+    }
+
+    public function getUserItems($name)
+	{
+		$stmt = $this->_db->prepare("SELECT i.id, i.name, i.price, i.level_req, w.str_mod, w.def_mod, w.dex_mod, w.spd_mod, w.attack_msg, o.equipped 
+			FROM users u LEFT JOIN item_owned as o ON u.uid = o.oid LEFT JOIN items 
+			as i ON o.iid = i.id LEFT JOIN weapons as w on w.iid = i.id 
+			WHERE username = :uname AND i.type = 'Weapon' ORDER BY o.equipped DESC");
+		$stmt->execute([':uname' => $name]);
+
+		$this->_output['weapons'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+		$stmt2 = $this->_db->prepare("SELECT i.id, i.name, i.material, i.price, a.str_mod, a.def_mod, a.dex_mod, a.spd_mod, a.fit_position, a.defense_msg,
+		i.level_req, o.equipped FROM users u LEFT JOIN item_owned as o ON u.uid = o.oid LEFT JOIN items 
+		as i ON o.iid = i.id LEFT JOIN armour as a ON i.id = a.iid WHERE username = :uname AND i.type = 'Armour' ORDER BY a.fit_position, o.equipped DESC");
+		$stmt2->execute([':uname' => $name]);
+
+		$this->_output['armour'] = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
+
+		$stmt3 = $this->_db->prepare("SELECT i.id, i.name, i.material, i.price, i.level_req, i.modifier FROM users u LEFT JOIN item_owned as o ON u.uid = o.oid LEFT JOIN items 
+		as i ON o.iid = i.id WHERE username = :uname AND i.type != 'Weapon' AND i.type != 'Armour'");
+		$stmt3->execute([':uname' => $name]);
+
+		$this->_output['items'] = $stmt3->fetchAll(\PDO::FETCH_ASSOC);
+				
+		return $this->_output;
+	}
 }

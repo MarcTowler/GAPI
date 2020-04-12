@@ -22,7 +22,7 @@ class Event extends Library\BaseController
 
     public function ListEvents()
     {
-        //if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
+        if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $output = $this->_db->getEventList();
