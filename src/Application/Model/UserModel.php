@@ -185,7 +185,7 @@ class UserModel extends Library\BaseModel
                 ':sub'    => ($source == 0) ? 0 : $playerArray['sub'],
                 ':vip'    => ($source == 0) ? 0 : $playerArray['vip'],
                 ':class'  => $playerArray['class'],
-                ':race'   => $this->getRace($playerArray['race'], false)['name'],
+                ':race'   => $this->getRace($playerArray['race'], false)['id'],
                 ':hp'     => $playerArray['hp'],
                 ':ap'     => $playerArray['ap'],
                 ':str'    => $playerArray['str'],
