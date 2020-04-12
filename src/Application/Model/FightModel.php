@@ -15,7 +15,7 @@ namespace API\Model;
 
 use API\Library;
 
-class StatsModel extends Library\BaseModel
+class FightModel extends Library\BaseModel
 {
 
 	public function __construct()
