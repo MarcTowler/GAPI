@@ -39,7 +39,12 @@ class BankModel extends Library\BaseModel
             (($flag == 0) ? 'u.username = :id' : 
             (($flag == 1) ? 'u.discord_id = :id' : 
             (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
-        $stmt->execute([':id' => $id]);
+        $stmt->execute(
+            [
+                ':id'  => $id,
+                ':amt' => $amount
+            ]
+        );
         
         $success = ($stmt->rowCount() > 0) ? true : false;
 
@@ -108,7 +113,7 @@ class BankModel extends Library\BaseModel
                 (SELECT u.uid FROM `users` u WHERE " . 
                 (($flag == 0) ? "u.username = :id" : 
                 (($flag == 1) ? "u.discord_id = :id" : 
-                (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id"))) . ", 0, 0)");
+                (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id"))) . "), 0, 0)");
             $ins->execute([':id' => $id]);
 
             return ['success' => true];
@@ -132,7 +137,7 @@ class BankModel extends Library\BaseModel
         $stmt = $this->_db->prepare("SELECT u.pouch FROM `users` u WHERE " . 
             (($flag == 0) ? "u.username = :id" : 
             (($flag == 1) ? "u.discord_id = :id" : 
-            (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id"))) . ", 0, 0)");
+    (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id")))/* . ", 0, 0)"*/);
         $stmt->execute([':id' => $id]);
 
         $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);

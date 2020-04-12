@@ -1,4 +1,15 @@
 <?php
+/**
+ * Bank Endpoint
+ *
+ * All Bank related functions will be handled in here
+ *
+ * @package		GAPI
+ * @author		Marc Towler <marc@marctowler.co.uk>
+ * @copyright	Copyright (c) 2019 Marc Towler
+ * @link		https://gapi.itslit.uk
+ * @since       Version 1.0
+ */
 namespace API\Controllers;
 
 use API\Library;
@@ -48,7 +59,7 @@ class Bank extends Library\BaseController
             return $this->_output->output(400, "Insufficient balance to deposit", false);
         }
         
-        $output = $this->_db->deposit($data['id'], $data['type'], $data['amount']);
+        $output = $this->_db->deposit($data['id'], $data['flag'], $data['amount']);
 
         return $this->_output->output(200, $output, false);
     }
@@ -66,6 +77,8 @@ class Bank extends Library\BaseController
     {
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
 
         if(!isset($data) || empty($data))
         {
@@ -117,6 +130,8 @@ class Bank extends Library\BaseController
     {
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
         if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
+
+        $data = json_decode(file_get_contents('php://input'), true);
 
         if(!isset($data) || empty($data))
         {
