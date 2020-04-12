@@ -56,7 +56,7 @@ abstract class BaseController
 
 	public function authenticate()
 	{
-		if(!isset($this->_headers['token']) || ($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4))
+		if(!isset($this->_headers['user']) || ($this->_auth->validate_token($this->_headers['token'], $this->_headers['user'])['level'] != 4))
         {
 			//No header, could be QS based. Lets see how big _params is and take the last value
 			if($this->_params[sizeof($this->_params)-1][0] === '?')

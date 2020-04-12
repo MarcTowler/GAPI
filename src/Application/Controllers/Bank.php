@@ -41,7 +41,7 @@ class Bank extends Library\BaseController
             return $this->_output->output(400, "No data POSTed to the API", false);
         }
 
-        $pouch = $this->_db->getPouch($data['id'], $data['type'])['pouch'];
+        $pouch = $this->_db->getPouch($data['id'], $data['flag'])['pouch'];
 
         if($pouch < $data['amount'])
         {
@@ -73,14 +73,14 @@ class Bank extends Library\BaseController
         }
 
         //lets get the balance and check we can do this
-        $bal = $this->_db->checkBalance($data['id'], $data['type']);
+        $bal = $this->_db->checkBalance($data['id'], $data['flag']);
 
         if($bal < $data['amount'])
         {
             return $this->_output->output(400, "Insufficient balance to withdraw", false);
         }
 
-        $output = $this->_db->withdraw($data['id'], $data['type'], $data['amount']);
+        $output = $this->_db->withdraw($data['id'], $data['flag'], $data['amount']);
 
         return $this->_output->output(200, $output, false);
     }
@@ -123,7 +123,7 @@ class Bank extends Library\BaseController
             return $this->_output->output(400, "No data POSTed to the API", false);
         }
 
-        $output = $this->_db->openAccount($data['id'], $data['type']);
+        $output = $this->_db->openAccount($data['id'], $data['flag']);
 
         return $this->_output->output(200, $output, false);
     }

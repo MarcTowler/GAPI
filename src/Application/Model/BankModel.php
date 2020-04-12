@@ -27,7 +27,7 @@ class BankModel extends Library\BaseModel
      * Deposits gold to the specified user's account
      *
      * @param int User ID
-     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = cid
+     * @param int Flag 0 = username, 1 = discord id, 2 = twitch id, 3 = uid
      * @param int Amount to deposit
      *
      * @return bool success or failure
@@ -35,10 +35,10 @@ class BankModel extends Library\BaseModel
     public function deposit($id, $flag, $amount)
     {
         //first off we need to check what coins the player has on them
-        $stmt = $this->_db->prepare("UPDATE bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid SET b.balance = b.balance + :amt, c.pouch = c.pouch - :amt WHERE " .
-            (($flag == 0) ? 'c.username = :id' : 
+        $stmt = $this->_db->prepare("UPDATE bank b INNER JOIN `users` u ON b.uid = u.uid SET b.balance = b.balance + :amt, u.pouch = u.pouch - :amt WHERE " .
+            (($flag == 0) ? 'u.username = :id' : 
             (($flag == 1) ? 'u.discord_id = :id' : 
-            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+            (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
         $stmt->execute([':id' => $id]);
         
         $success = ($stmt->rowCount() > 0) ? true : false;
@@ -59,10 +59,10 @@ class BankModel extends Library\BaseModel
      */
     public function withdraw($id, $type, $amount)
     {
-        $upd = $this->_db->prepare("UPDATE bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid SET b.balance = b.balance - :amt, c.pouch = c.pouch + :amt WHERE " .
-            (($flag == 0) ? 'c.username = :id' : 
+        $upd = $this->_db->prepare("UPDATE bank b INNER JOIN `users` u ON b.uid = u.uid SET b.balance = b.balance - :amt, u.pouch = u.pouch + :amt WHERE " .
+            (($flag == 0) ? 'u.username = :id' : 
             (($flag == 1) ? 'u.discord_id = :id' : 
-            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+            (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
         $upd->execute([':id' => $id]);
 
         $success = ($upd->rowCount() > 0) ? true : false;
@@ -80,10 +80,10 @@ class BankModel extends Library\BaseModel
      */
     public function checkBalance($id, $flag)
     {
-        $stmt = $this->_db->prepare("SELECT b.balance FROM bank b INNER JOIN `character` c ON b.uid = c.cid INNER JOIN users u ON c.uid = u.uid WHERE " . 
-            (($flag == 0) ? 'c.username = :id' : 
+        $stmt = $this->_db->prepare("SELECT b.balance FROM bank b INNER JOIN `users` u ON b.uid = u.uid WHERE " . 
+            (($flag == 0) ? 'u.username = :id' : 
             (($flag == 1) ? 'u.discord_id = :id' : 
-            (($flag == 2) ? 'u.twitch_id = :id' : 'c.cid = :id'))));
+            (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
         $stmt->execute([':id' => $id]);
 
         $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -105,10 +105,10 @@ class BankModel extends Library\BaseModel
     {
         try {
             $ins = $this->_db->prepare("INSERT INTO bank (uid, balance, protected) VALUES (
-                (SELECT c.cid FROM `character` c INNER JOIN users u ON c.uid = u.uid WHERE " . 
-                (($flag == 0) ? "c.username = :id" : 
+                (SELECT u.uid FROM `users` u WHERE " . 
+                (($flag == 0) ? "u.username = :id" : 
                 (($flag == 1) ? "u.discord_id = :id" : 
-                (($flag == 2) ? "u.twitch_id = :id" : "c.uid = :id"))) . ", 0, 0)");
+                (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id"))) . ", 0, 0)");
             $ins->execute([':id' => $id]);
 
             return ['success' => true];
@@ -129,10 +129,10 @@ class BankModel extends Library\BaseModel
      */
     public function getPouch($id, $flag)
     {
-        $stmt = $this->_db->prepare("SELECT c.pouch FROM `character` c INNER JOIN users u ON c.uid = u.uid WHERE " . 
-            (($flag == 0) ? "c.username = :id" : 
+        $stmt = $this->_db->prepare("SELECT u.pouch FROM `users` u WHERE " . 
+            (($flag == 0) ? "u.username = :id" : 
             (($flag == 1) ? "u.discord_id = :id" : 
-            (($flag == 2) ? "u.twitch_id = :id" : "c.uid = :id"))) . ", 0, 0)");
+            (($flag == 2) ? "u.twitch_id = :id" : "u.uid = :id"))) . ", 0, 0)");
         $stmt->execute([':id' => $id]);
 
         $this->_output = $stmt->fetch(\PDO::FETCH_ASSOC);
