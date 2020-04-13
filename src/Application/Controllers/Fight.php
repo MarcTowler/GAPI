@@ -54,7 +54,7 @@ class Fight extends Library\BaseController
 
         $input = json_decode(file_get_contents('php://input'), true);
 
-		$char = $this->_user->getPlayer($input['id'], $input['flag']);
+		    $char = $this->_user->getPlayer($input['id'], $input['flag']);
 
         $min_xp = $this->_user->xpNeeded($char['level'])['xp_needed'];
 
