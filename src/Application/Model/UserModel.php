@@ -442,14 +442,14 @@ class UserModel extends Library\BaseModel
     public function update_player($type, $change, $id, $flag)
     {
         try {
-            $stmt = $this->_db->prepare("UPDATE users u SET $type = :change WHERE " .
-                (($flag == 0) ? 'u.username = :id' : 
-                (($flag == 1) ? 'u.discord_id = :id' : 
-                (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
+            $stmt = $this->_db->prepare("UPDATE users SET $type = :change WHERE " .
+                (($flag == 0) ? 'username = :id' : 
+                (($flag == 1) ? 'discord_id = :id' : 
+                (($flag == 2) ? 'twitch_id = :id' : 'uid = :id'))));
+
             $stmt->execute(
                 [
                     ':id'     => $id,
-                    //':type'   => $type,
                     ':change' => $change
                 ]
             );
