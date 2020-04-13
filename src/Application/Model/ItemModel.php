@@ -47,7 +47,7 @@ class ItemModel extends Library\BaseModel
 		if($count['num'] !== 0)
 		{
             //lets get current and max health
-            $health = $this->_db->prepare("SELECT cur_hp, max_hp FROM `character` WHERE uid = :uid");
+            $health = $this->_db->prepare("SELECT cur_hp, max_hp FROM users WHERE uid = :uid");
             $health->execute([':uid' => $uid]);
             $hp = $health->fetch(\PDO::FETCH_ASSOC);
 
@@ -64,7 +64,7 @@ class ItemModel extends Library\BaseModel
             $mod = (($tmp['cur_hp'] + $hp['cur_hp']) > $hp['max_hp']) ? $hp['max_hp'] : ($tmp['cur_hp'] + $hp['cur_hp']);
 
 			//Need to add a way to stop this from going over max_hp
-			$upd = $this->_db->prepare("UPDATE `character` SET cur_hp = :mod WHERE uid = :uid");
+			$upd = $this->_db->prepare("UPDATE users SET cur_hp = :mod WHERE uid = :uid");
 			$upd->execute(
 				[
 					':mod' => $mod,

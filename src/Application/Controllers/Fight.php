@@ -27,7 +27,7 @@ class Fight extends Library\BaseController
     public function pveWin()
     {
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
-        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
         
         $input = json_decode(file_get_contents('php://input'), true);
 		$char = $this->_user->getPlayer($input['id'], $input['flag']);
@@ -38,7 +38,7 @@ class Fight extends Library\BaseController
         $output['xp']    = $this->_user->updateXP($char['uid'], $input['xp'], $input['win']);
 
 		//update HP
-		$this->_user->updatePlayer('cur_hp', $input['newHP'], $char['uid'], 3);
+		$this->_user->update_player('cur_hp', $input['newHP'], $char['uid'], 3);
 
 		$this->_db->updatePveStats($char['uid'], $input['monster'], true);
         
@@ -50,10 +50,11 @@ class Fight extends Library\BaseController
     public function pveLoss()
     {
         if(!$this->authenticate()) { return $this->_output->output(401, 'Authentication failed', false); }
-        if(!$this->validRequest('GET')) { return $this->_output->output(405, "Method Not Allowed", false); }
+        if(!$this->validRequest('POST')) { return $this->_output->output(405, "Method Not Allowed", false); }
 
         $input = json_decode(file_get_contents('php://input'), true);
-		$char = $this->_user->getPlayer($input['id'], $input['flag']);
+
+		    $char = $this->_user->getPlayer($input['id'], $input['flag']);
 
         $min_xp = $this->_user->xpNeeded($char['level'])['xp_needed'];
 
@@ -63,11 +64,11 @@ class Fight extends Library\BaseController
         $input['xp'] = ($input['xp'] < $min_xp) ? $min_xp : $input['xp'];
 
 		$this->_log->set_message("pveLoss called for " . $char['username'] . " for " . $input['pouch'] . " litcoins", "INFO");
-		$output['coins'] = $this->_db->updateCoin($char['uid'], $input['pouch'], $input['win']);
-		$output['xp']    = $this->_db->updateXP($char['uid'], $input['xp'], $input['win']);
+		$output['coins'] = $this->_user->updateCoin($char['uid'], $input['pouch'], $input['win']);
+		$output['xp']    = $this->_user->updateXP($char['uid'], $input['xp'], $input['win']);
         
 		//update HP
-		$this->_user->updatePlayer('cur_hp', $input['newHP'], $char['uid'], 3);
+		$this->_user->update_player('cur_hp', $input['newHP'], $char['uid'], 3);
 
 		$this->_db->updatePveStats($char['uid'], $input['monster'], $input['win']);
 		$this->_mon->update_stats($input['monster'], $input['win']);
