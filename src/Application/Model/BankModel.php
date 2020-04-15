@@ -62,7 +62,7 @@ class BankModel extends Library\BaseModel
      *
      * @return bool success or failure
      */
-    public function withdraw($id, $type, $amount)
+    public function withdraw($id, $flag, $amount)
     {
         $upd = $this->_db->prepare("UPDATE bank b INNER JOIN `users` u ON b.uid = u.uid SET b.balance = b.balance - :amt, u.pouch = u.pouch + :amt WHERE " .
             (($flag == 0) ? 'u.username = :id' : 
