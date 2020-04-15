@@ -390,7 +390,7 @@ class UserModel extends Library\BaseModel
     
     public function regen($amount = 1)
     {
-        $stmt = $this->_db->prepare("SELECT uid, cur_hp, cur_ap, max_hp, max_ap FROM users WHERE cur_hp > 0 AND gathering = 0 AND travelling = 0");
+        $stmt = $this->_db->prepare("SELECT u.uid, u.cur_hp, u.cur_ap, u.max_hp, u.max_ap, r.hp_mod, r.ap_mod FROM users u INNER JOIN race r ON r.id = u.race WHERE u.cur_hp > 0 AND u.gathering = 0 AND u.travelling = 0");
 
         $stmt->execute();
 
@@ -398,7 +398,7 @@ class UserModel extends Library\BaseModel
 
         for($i = 0; $i < count($users); $i++)
         {
-            if($users[$i]['cur_hp'] < $users[$i]['max_hp'])
+            if($users[$i]['cur_hp'] < ($users[$i]['max_hp'] + $users[$i]['hp_mod']))
             {
                 $hp = $this->_db->prepare("UPDATE users SET cur_hp = cur_hp + :amt WHERE uid = :id");
                 $hp->execute(
@@ -409,7 +409,7 @@ class UserModel extends Library\BaseModel
                 );
             }
 
-            if($users[$i]['cur_ap'] < $users[$i]['max_ap'])
+            if($users[$i]['cur_ap'] < ($users[$i]['max_ap'] + $users[$i]['ap_mod']))
             {
                 $ap = $this->_db->prepare("UPDATE users SET cur_ap = cur_ap + :amt WHERE uid = :id");
                 $ap->execute(
