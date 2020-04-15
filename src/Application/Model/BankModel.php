@@ -68,7 +68,12 @@ class BankModel extends Library\BaseModel
             (($flag == 0) ? 'u.username = :id' : 
             (($flag == 1) ? 'u.discord_id = :id' : 
             (($flag == 2) ? 'u.twitch_id = :id' : 'u.uid = :id'))));
-        $upd->execute([':id' => $id]);
+        $upd->execute(
+            [
+                ':id'  => $id,
+                ':amt' => $amount
+            ]
+        );
 
         $success = ($upd->rowCount() > 0) ? true : false;
       }
