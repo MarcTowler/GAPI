@@ -305,7 +305,7 @@ class User extends Library\BaseController
 
 		$rng = rand(1, 4);
 
-		if(((int)$player['xp'] + $data['xp']) >= $this->_db->xpNeeded($player['level'] + 1))
+		if(((int)$player['xp'] + $data['xp']) >= $this->_db->xpNeeded($player['level'] + 1)['xp_needed'])
 		{
 			$levelUp = true;
 			$this->_db->level($player['uid'], $rng);
@@ -314,9 +314,9 @@ class User extends Library\BaseController
 
 		if($levelUp == true)
 		{
-			return $this->_output->output(200, ['level up' => true, 'new level' => $player['level'] + 1]);
+			return $this->_output->output(200, ['level up' => true, 'new level' => $player['level'] + 1], false);
 		} else {
-			return $this->_output->output(202, ['level up' => false]);
+			return $this->_output->output(202, ['level up' => false], false);
 		}
     }
 
