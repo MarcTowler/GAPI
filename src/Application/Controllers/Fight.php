@@ -61,9 +61,8 @@ class Fight extends Library\BaseController
 		$input['pouch'] = ($char['pouch'] < $input['pouch']) ? $char['pouch'] : $input['pouch'];
         $input['xp']    = ($char['xp'] < $input['xp']) ? $char['xp'] : $input['xp'];
         
-        $input['xp'] = ($input['xp'] < $min_xp) ? $min_xp : $input['xp'];
+        $input['xp'] = (($char['xp'] - $input['xp']) < $min_xp) ? $min_xp : $input['xp'];
 
-		$this->_log->set_message("pveLoss called for " . $char['username'] . " for " . $input['pouch'] . " litcoins", "INFO");
 		$output['coins'] = $this->_user->updateCoin($char['uid'], $input['pouch'], $input['win']);
 		$output['xp']    = $this->_user->updateXP($char['uid'], $input['xp'], $input['win']);
         
