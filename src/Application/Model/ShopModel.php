@@ -47,6 +47,16 @@ class ShopModel extends Library\BaseModel
 		{
 			return false;
 		} else {
+			//Check they can afford it 
+			$user = $this->_db->prepare("SELECT pouch FROM users where uid = :user");
+			$user->execute([':user' => $user]);
+			$pouch = $user->fetch(\PDO::FETCH_ASSOC)['pouch'];
+
+			if(($pouch - $shop['price']) < 0)
+			{
+				return false;
+			}
+
 			$stmt = $this->_db->prepare("UPDATE shop_items si INNER JOIN shop s ON (s.sid = si.sid) SET si.qty = si.qty - 1, s.balance = s.balance + :price WHERE s.sid = :shop AND si.iid = :id");
 			$stmt->execute(
 				[
