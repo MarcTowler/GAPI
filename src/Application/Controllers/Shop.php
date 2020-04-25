@@ -37,8 +37,8 @@ class Shop extends Library\BaseController
 		//displays stored info on the shop, lore, level restrictions, specialty etc
 		$shop_id = $this->_params[0];
 
-		$shop          = $this->_db->getShopInfo($shop_id);
-		$shop['stock'] = $this->_db->getStock($shop_id);
+		$shop = $this->_db->getShopInfo($shop_id);
+		$shop = $this->_db->getStock($shop_id);
 
 		return $this->_output->output(200, $shop, false);
     }
