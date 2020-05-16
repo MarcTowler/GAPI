@@ -19,6 +19,7 @@ namespace API\Library;
 class Router
 {
     private $_segments   = [];
+    private $_fragments  = [];
     private $_parameters = [];
     private $_headers    = [];
     private $_request    = '';
@@ -26,6 +27,7 @@ class Router
     public function __construct()
     {
         $this->_getSegments();
+        $this->_getFragments();
         $this->_getParameters();
         $this->_getHeaders();
         $this->_requestType();
@@ -49,6 +51,11 @@ class Router
     private function _getSegments()
     {
         $this->_segments = explode('/', $this->getURI());
+    }
+
+    private function _getFragments()
+    {
+        $this->_fragments = parse_url($this->getURI(), PHP_URL_FRAGMENT);
     }
 
     public function getController()
