@@ -48,9 +48,9 @@ class ShopModel extends Library\BaseModel
 			return false;
 		} else {
 			//Check they can afford it 
-			$ustmt = $this->_db->prepare("SELECT pouch FROM users where uid = :user");
-			$ustmt->execute([':user' => $user]);
-			$pouch = $ustmt->fetch(\PDO::FETCH_ASSOC)['pouch'];
+			$user = $this->_db->prepare("SELECT pouch FROM users where uid = :user");
+			$user->execute([':user' => $user]);
+			$pouch = $user->fetch(\PDO::FETCH_ASSOC)['pouch'];
 
 			if(($pouch - $shop['price']) < 0)
 			{
