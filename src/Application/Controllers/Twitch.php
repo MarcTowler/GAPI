@@ -22,16 +22,4 @@ class Twitch extends Library\BaseController
         parent::__destruct();
     }
 
-    public function addUser()
-    {
-        $id     = $this->_twitch->get_user_id($this->_params[0]);
-        $output = $this->_db->add_user($id, $this->_params[0]);
-
-        return $this->_output->output(200, $output, false);
-    }
-
-    public function updateUser()
-    {
-
-    }
 }
